@@ -1,0 +1,9 @@
+Housekeeping-App-2026/
+├── index.html          # Main dashboard entry point
+├── css/
+│   └── styles.css      # All styling with color-coded statuses
+├── js/
+│   ├── data.js         # Data management with localStorage
+│   └── app.js          # Interactive UI logic
+└── data/
+    └── rooms.json      # Initial room data (backup)
