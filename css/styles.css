@@ -1,0 +1,439 @@
+/* Housekeeping App Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #f5f7fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border-color: #e1e8ed;
+    
+    /* Status Colors */
+    --status-clean: #27ae60;
+    --status-dirty: #e74c3c;
+    --status-inspected: #3498db;
+    --status-maintenance: #f39c12;
+    --status-checkout: #9b59b6;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.16);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 20px 24px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.app-header h1 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--status-clean);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #219a52;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: #e8ecf0;
+}
+
+.btn-danger {
+    background: var(--status-dirty);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* Legend */
+.legend {
+    display: flex;
+    gap: 24px;
+    padding: 16px 24px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.status-dot.clean { background: var(--status-clean); }
+.status-dot.dirty { background: var(--status-dirty); }
+.status-dot.inspected { background: var(--status-inspected); }
+.status-dot.maintenance { background: var(--status-maintenance); }
+.status-dot.checkout { background: var(--status-checkout); }
+
+/* Hotel Grid */
+.hotel-grid {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.floor-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 40px;
+}
+
+.floor-label {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.stairways-container {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+.stairway {
+    flex: 1;
+    min-width: 0;
+}
+
+.stairway-header {
+    text-align: center;
+    padding: 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.stairway-rooms {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 0 0 8px 8px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Room Cards */
+.room-card {
+    height: 72px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.room-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+}
+
+.room-card.clean {
+    background: rgba(39, 174, 96, 0.1);
+    border: 1px solid var(--status-clean);
+}
+.room-card.clean::before { background: var(--status-clean); }
+
+.room-card.dirty {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--status-dirty);
+}
+.room-card.dirty::before { background: var(--status-dirty); }
+
+.room-card.inspected {
+    background: rgba(52, 152, 219, 0.1);
+    border: 1px solid var(--status-inspected);
+}
+.room-card.inspected::before { background: var(--status-inspected); }
+
+.room-card.maintenance {
+    background: rgba(243, 156, 18, 0.1);
+    border: 1px solid var(--status-maintenance);
+}
+.room-card.maintenance::before { background: var(--status-maintenance); }
+
+.room-card.checkout {
+    background: rgba(155, 89, 182, 0.1);
+    border: 1px solid var(--status-checkout);
+}
+.room-card.checkout::before { background: var(--status-checkout); }
+
+.room-number {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.room-status {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.room-guest {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Status Summary */
+.status-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+}
+
+.summary-card {
+    padding: 20px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+}
+
+.summary-card .count {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.summary-card .label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.summary-card.clean .count { color: var(--status-clean); }
+.summary-card.dirty .count { color: var(--status-dirty); }
+.summary-card.inspected .count { color: var(--status-inspected); }
+.summary-card.maintenance .count { color: var(--status-maintenance); }
+.summary-card.checkout .count { color: var(--status-checkout); }
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    font-size: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.form-group select,
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.form-group select:focus,
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--status-inspected);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-footer .btn {
+    flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .app-header {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+    }
+    
+    .hotel-grid {
+        flex-direction: column;
+    }
+    
+    .floor-labels {
+        flex-direction: row;
+        padding-top: 0;
+        justify-content: space-around;
+    }
+    
+    .floor-label {
+        height: auto;
+        width: 60px;
+    }
+    
+    .stairways-container {
+        flex-direction: column;
+    }
+    
+    .stairway-rooms {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .room-card {
+        flex: 1;
+        min-width: 80px;
+        height: 60px;
+    }
+    
+    .legend {
+        justify-content: center;
+    }
+}

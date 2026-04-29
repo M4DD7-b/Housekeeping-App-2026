@@ -1,0 +1,22 @@
+{
+  "hotel": {
+    "name": "Grand Hotel",
+    "floors": 4,
+    "stairways": 5
+  },
+  "stairways": [
+    { "id": 1, "name": "Stairway 1", "roomsPerFloor": 5 },
+    { "id": 2, "name": "Stairway 2", "roomsPerFloor": 6 },
+    { "id": 3, "name": "Stairway 3", "roomsPerFloor": 8 },
+    { "id": 4, "name": "Stairway 4", "roomsPerFloor": 7 },
+    { "id": 5, "name": "Stairway 5", "roomsPerFloor": 8 }
+  ],
+  "statuses": [
+    { "id": "clean", "label": "Clean", "color": "#27ae60" },
+    { "id": "dirty", "label": "Dirty", "color": "#e74c3c" },
+    { "id": "inspected", "label": "Inspected", "color": "#3498db" },
+    { "id": "maintenance", "label": "Maintenance", "color": "#f39c12" },
+    { "id": "checkout", "label": "Checkout", "color": "#9b59b6" }
+  ],
+  "rooms": []
+}
