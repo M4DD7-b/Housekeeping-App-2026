@@ -1,4 +1,0 @@
-Update Room Status from
-    ['clean', 'dirty', 'inspected', 'maintenance', 'checkout']
-to
-    ['done', 'dirty', 'checked', 'maintenance', 'checkout', 'occupied']

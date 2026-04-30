@@ -1,0 +1,9 @@
+Update Room Status from
+    ['clean', 'dirty', 'inspected', 'maintenance', 'checkout']
+to
+    ['done', 'dirty', 'checked', 'maintenance', 'checkout', 'occupied']
+
+Update Header Buttons from
+    Refresh, Export
+
+Make Summary Cards into Clickable Lists

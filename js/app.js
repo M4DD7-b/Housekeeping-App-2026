@@ -10,15 +10,6 @@ const exportBtn = document.getElementById('exportBtn');
 const saveRoomBtn = document.getElementById('saveRoomBtn');
 const resetRoomBtn = document.getElementById('resetRoomBtn');
 
-// Add Room elements
-const addRoomBtn = document.getElementById('addRoomBtn');
-const addRoomModal = document.getElementById('addRoomModal');
-const addRoomModalClose = document.getElementById('addRoomModalClose');
-const addStairway = document.getElementById('addStairway');
-const addFloor = document.getElementById('addFloor');
-const addRoomName = document.getElementById('addRoomName');
-const confirmAddRoomBtn = document.getElementById('confirmAddRoomBtn');
-
 // Modal form elements
 const modalRoomTitle = document.getElementById('modalRoomTitle');
 const roomStatus = document.getElementById('roomStatus');
@@ -183,43 +174,6 @@ function setupEventListeners() {
         if (e.key === 'Escape' && roomModal.classList.contains('active')) {
             closeModal();
         }
-        if (e.key === 'Escape' && addRoomModal.classList.contains('active')) {
-            closeAddRoomModal();
-        }
-    });
-
-    // Add Room button
-    addRoomBtn.addEventListener('click', () => {
-        addRoomModal.classList.add('active');
-    });
-
-    // Add Room modal close
-    addRoomModalClose.addEventListener('click', closeAddRoomModal);
-    addRoomModal.addEventListener('click', (e) => {
-        if (e.target === addRoomModal) {
-            closeAddRoomModal();
-        }
-    });
-
-    // Confirm Add Room
-    confirmAddRoomBtn.addEventListener('click', () => {
-        const stairway = parseInt(addStairway.value);
-        const floor = parseInt(addFloor.value);
-        const roomName = addRoomName.value.trim();
-
-        if (!roomName || roomName.length > 50) {
-            alert('Please enter a valid room name less than 50 characters');
-            return;
-        }
-
-        if (addRoom(stairway, floor, roomName)) {
-            closeAddRoomModal();
-            addRoomName.value = '';
-            renderStairways();
-            renderStatusSummary();
-        } else {
-            alert('Room already exists in this location!');
-        }
     });
 }
 
@@ -246,12 +200,6 @@ function openRoomModal(roomId) {
 function closeModal() {
     roomModal.classList.remove('active');
     currentRoomId = null;
-}
-
-// Close Add Room modal
-function closeAddRoomModal() {
-    addRoomModal.classList.remove('active');
-    addRoomName.value = '';
 }
 
 // Save room changes

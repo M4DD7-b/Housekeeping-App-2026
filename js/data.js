@@ -30,7 +30,7 @@ function loadRooms() {
     }
     
     // Return empty array - no auto-generation
-    // Rooms must be explicitly added via importRooms() or addRoom()
+    // Rooms must be explicitly added via importRooms()
     return [];
 }
 
@@ -163,32 +163,6 @@ function resetAllRooms() {
     return [];
 }
 
-// Add a new room to an existing stairway/floor
-function addRoom(stairwayId, floor, roomName) {
-    const rooms = loadRooms();
-    const roomId = `${stairwayId}-${floor}-${roomName}`;
-
-    // Check if room already exists
-    if (rooms.find(r => r.id === roomId)) {
-        return null; // Room already exists
-    }
-
-    const newRoom = {
-        id: roomId,
-        stairway: parseInt(stairwayId),
-        floor: parseInt(floor),
-        name: roomName,
-        status: 'checked',
-        notes: '',
-        guest: '',
-        lastUpdated: new Date().toISOString()
-    };
-
-    rooms.push(newRoom);
-    saveRooms(rooms);
-    return newRoom;
-}
-
 // Import rooms from a JSON array (e.g., from rooms.json)
 function importRooms(roomList) {
     if (!Array.isArray(roomList)) {
@@ -226,7 +200,6 @@ if (typeof module !== 'undefined' && module.exports) {
         getRoomsByLocation,
         exportRooms,
         resetAllRooms,
-        addRoom,
         importRooms
     };
 
@@ -244,7 +217,6 @@ if (typeof module !== 'undefined' && module.exports) {
         window.getRoomsByLocation = getRoomsByLocation;
         window.exportRooms = exportRooms;
         window.resetAllRooms = resetAllRooms;
-        window.addRoom = addRoom;
         window.importRooms = importRooms;
     };
 }
