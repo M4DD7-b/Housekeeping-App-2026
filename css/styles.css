@@ -15,9 +15,9 @@
     --border-color: #e1e8ed;
     
     /* Status Colors */
-    --status-done: #ffd900;
-    --status-dirty: #e74c3c;
-    --status-checked: #25e442;
+    --status-done: rgb(255, 217, 0);
+    --status-dirty: rgb(231, 76, 60);
+    --status-checked: rgb(37, 228, 66);
     --status-maintenance: #f39c12;
     --status-checkout: rgb(23, 93, 255);
     --status-occupied: #9b59b6;
@@ -254,10 +254,10 @@ body {
 }
 
 .room-card.done {
-    background: rgba(39, 174, 96, 0.08);
-    border-left-color: var(--status-clean);
+    background: rgba(255, 217, 0, 0.08);
+    border-left-color: var(--status-done);
 }
-.room-card.done::before { background: var(--status-clean); }
+.room-card.done::before { background: var(--status-done); }
 
 .room-card.dirty {
     background: rgba(231, 76, 60, 0.08);
@@ -266,10 +266,10 @@ body {
 .room-card.dirty::before { background: var(--status-dirty); }
 
 .room-card.checked {
-    background: rgba(52, 152, 219, 0.08);
-    border-left-color: var(--status-inspected);
+    background: rgba(37, 228, 66, 0.08);
+    border-left-color: var(--status-checked);
 }
-.room-card.checked::before { background: var(--status-inspected); }
+.room-card.checked::before { background: var(--status-checked); }
 
 .room-card.maintenance {
     background: rgba(243, 156, 18, 0.08);

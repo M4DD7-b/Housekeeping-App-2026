@@ -10,3 +10,5 @@ Make Summary Cards into Clickable Lists
 
 Add stairway heading colours
     Colours already in style.css
+
+Make additional notes display on cards
