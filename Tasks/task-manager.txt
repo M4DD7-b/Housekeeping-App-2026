@@ -7,3 +7,6 @@ Update Header Buttons from
     Refresh, Export
 
 Make Summary Cards into Clickable Lists
+
+Add stairway heading colours
+    Colours already in style.css

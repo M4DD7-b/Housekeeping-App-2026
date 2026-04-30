@@ -19,7 +19,7 @@
     --status-dirty: #e74c3c;
     --status-checked: #25e442;
     --status-maintenance: #f39c12;
-    --status-checkout: #5f8fff;
+    --status-checkout: rgb(23, 93, 255);
     --status-occupied: #9b59b6;
     
     /* Shadows */
@@ -35,6 +35,13 @@
     --harrison-cream: #f4f1ea;
     --harrison-charcoal: #3a3a3a;
     --harrison-mahogany: #4a2c2a;
+
+    /* Stairway pallete */
+    --stairway-1: #813E38;
+    --stairway-2: #C48655;
+    --stairway-3: #B25536;
+    --stairway-4: #12110D;
+    --stairway-5: #B9A990;
 }
 
 body {
@@ -271,16 +278,16 @@ body {
 .room-card.maintenance::before { background: var(--status-maintenance); }
 
 .room-card.checkout {
-    background: rgba(155, 89, 182, 0.08);
+    background: rgba(23, 93, 255, 0.08);
     border-left-color: var(--status-checkout);
 }
 .room-card.checkout::before { background: var(--status-checkout); }
 
 .room-card.occupied {
     background: rgba(155, 89, 182, 0.08);
-    border-left-color: var(--status-checkout);
+    border-left-color: var(--status-occupied);
 }
-.room-card.occupied::before { background: var(--status-checkout); }
+.room-card.occupied::before { background: var(--status-occupied); }
 
 .room-header {
     display: flex;
