@@ -15,55 +15,7 @@ const HOTEL_CONFIG = {
 };
 
 // Default room statuses
-const DEFAULT_STATUSES = ['clean', 'dirty', 'inspected', 'maintenance', 'checkout'];
-
-// Generate initial room data
-function generateInitialRooms() {
-    const rooms = [];
-    
-    HOTEL_CONFIG.stairways.forEach(stairway => {
-        HOTEL_CONFIG.floors.forEach(floor => {
-            for (let roomName = 1; roomName <= stairway.roomsPerFloor; roomName++) {
-                const roomId = `${stairway.id}-${floor}-${roomName}`;
-                rooms.push({
-                    id: roomId,
-                    stairway: stairway.id,
-                    floor: floor,
-                    name: roomName,
-                    status: getRandomStatus(),
-                    notes: '',
-                    guest: '',
-                    lastUpdated: new Date().toISOString()
-                });
-            }
-        });
-    });
-    
-    return rooms;
-}
-
-// Get a random status (weighted towards clean)
-function getRandomStatus() {
-    const weights = {
-        clean: 0.35,
-        dirty: 0.25,
-        inspected: 0.20,
-        maintenance: 0.10,
-        checkout: 0.10
-    };
-    
-    const random = Math.random();
-    let cumulative = 0;
-    
-    for (const [status, weight] of Object.entries(weights)) {
-        cumulative += weight;
-        if (random <= cumulative) {
-            return status;
-        }
-    }
-    
-    return 'clean';
-}
+const DEFAULT_STATUSES = ['done', 'dirty', 'checked', 'maintenance', 'checkout', 'occupied'];
 
 // Load rooms from localStorage or return empty if none stored
 function loadRooms() {
@@ -130,15 +82,15 @@ function updateRoom(roomId, updates) {
     return null;
 }
 
-// Delete a room (reset to default)
-function deleteRoom(roomId) {
+// Reset a room (reset to default)
+function resetRoom(roomId) {
     const rooms = loadRooms();
     const index = rooms.findIndex(r => r.id === roomId);
     
     if (index !== -1) {
         rooms[index] = {
             ...rooms[index],
-            status: 'clean',
+            status: 'checked',
             notes: '',
             guest: '',
             lastUpdated: new Date().toISOString()
@@ -226,7 +178,7 @@ function addRoom(stairwayId, floor, roomName) {
         stairway: parseInt(stairwayId),
         floor: parseInt(floor),
         name: roomName,
-        status: 'clean',
+        status: 'checked',
         notes: '',
         guest: '',
         lastUpdated: new Date().toISOString()
@@ -249,7 +201,7 @@ function importRooms(roomList) {
         stairway: room.stairway,
         floor: room.floor,
         name: room.name,
-        status: room.status || 'clean',
+        status: room.status || 'checked',
         notes: room.notes || '',
         guest: room.guest || '',
         lastUpdated: room.lastUpdated || new Date().toISOString()
@@ -269,7 +221,7 @@ if (typeof module !== 'undefined' && module.exports) {
         getRooms,
         getRoom,
         updateRoom,
-        deleteRoom,
+        resetRoom,
         getStatusSummary,
         getRoomsByLocation,
         exportRooms,
@@ -287,7 +239,7 @@ if (typeof module !== 'undefined' && module.exports) {
         window.getRooms = getRooms;
         window.getRoom = getRoom;
         window.updateRoom = updateRoom;
-        window.deleteRoom = deleteRoom;
+        window.resetRoom = resetRoom;
         window.getStatusSummary = getStatusSummary;
         window.getRoomsByLocation = getRoomsByLocation;
         window.exportRooms = exportRooms;

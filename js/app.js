@@ -8,7 +8,7 @@ const modalClose = document.querySelector('.modal-close');
 const refreshBtn = document.getElementById('refreshBtn');
 const exportBtn = document.getElementById('exportBtn');
 const saveRoomBtn = document.getElementById('saveRoomBtn');
-const deleteRoomBtn = document.getElementById('deleteRoomBtn');
+const resetRoomBtn = document.getElementById('resetRoomBtn');
 
 // Add Room elements
 const addRoomBtn = document.getElementById('addRoomBtn');
@@ -88,7 +88,10 @@ function createRoomCard(room) {
         <div class="room-card ${room.status}" 
              data-room-id="${room.id}"
              title="Room ${displayName} - ${statusLabel}">
-            <div class="room-name">${displayName}</div>
+            <div class="room-header">
+                <span class="room-name">${displayName}</span>
+                <span class="room-floor">Floor ${room.floor}</span>
+            </div>
             <div class="room-status">${statusLabel}</div>
             ${room.guest ? `<div class="room-guest">${escapeHtml(room.guest)}</div>` : ''}
         </div>
@@ -98,11 +101,12 @@ function createRoomCard(room) {
 // Get readable status label
 function getStatusLabel(status) {
     const labels = {
-        clean: 'Clean',
+        done: 'Done',
         dirty: 'Dirty',
-        inspected: 'Inspected',
+        checked: 'Checked',
         maintenance: 'Maintenance',
-        checkout: 'Checkout'
+        checkout: 'Checkout',
+        occupied: 'Occupied'
     };
     return labels[status] || status;
 }
@@ -112,11 +116,12 @@ function renderStatusSummary() {
     const summary = getStatusSummary();
     
     const statusConfig = [
-        { key: 'clean', label: 'Clean' },
+        { key: 'done', label: 'Done' },
         { key: 'dirty', label: 'Dirty' },
-        { key: 'inspected', label: 'Inspected' },
+        { key: 'checked', label: 'Checked' },
         { key: 'maintenance', label: 'Maintenance' },
-        { key: 'checkout', label: 'Checkout' }
+        { key: 'checkout', label: 'Checkout' },
+        { key: 'occupied', label: 'Occupied' }
     ];
     
     statusSummary.innerHTML = statusConfig.map(config => `
@@ -163,10 +168,10 @@ function setupEventListeners() {
         }
     });
     
-    // Delete room button
-    deleteRoomBtn.addEventListener('click', () => {
-        if (currentRoomId && confirm('Reset this room to clean status?')) {
-            deleteRoom(currentRoomId);
+    // Reset room button
+    resetRoomBtn.addEventListener('click', () => {
+        if (currentRoomId && confirm('Reset this room to checked status?')) {
+            resetRoom(currentRoomId);
             closeModal();
             renderStairways();
             renderStatusSummary();
