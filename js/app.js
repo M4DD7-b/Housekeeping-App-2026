@@ -29,7 +29,13 @@ const modalLastUpdated = document.getElementById('modalLastUpdated');
 let currentRoomId = null;
 
 // Initialize the app
-function init() {
+async function init() {
+    const roomsData = await fetch('data/rooms.json').then(r => r.json());
+    
+    if (roomsData.rooms && roomsData.rooms.length > 0) {
+        importRooms(roomsData.rooms);
+    }
+    
     renderStairways();
     renderStatusSummary();
     setupEventListeners();
@@ -76,13 +82,13 @@ function renderFloorRooms(floors) {
 // Create HTML for a single room card
 function createRoomCard(room) {
     const statusLabel = getStatusLabel(room.status);
-    const displayNumber = `${room.floor}${room.name.padStart(2, '0')}`;
+    const displayName = `${room.name}`;
     
     return `
         <div class="room-card ${room.status}" 
              data-room-id="${room.id}"
-             title="Room ${displayNumber} - ${statusLabel}">
-            <div class="room-number">${displayNumber}</div>
+             title="Room ${displayName} - ${statusLabel}">
+            <div class="room-name">${displayName}</div>
             <div class="room-status">${statusLabel}</div>
             ${room.guest ? `<div class="room-guest">${escapeHtml(room.guest)}</div>` : ''}
         </div>
@@ -196,14 +202,14 @@ function setupEventListeners() {
         const floor = parseInt(addFloor.value);
         const roomName = addRoomName.value.trim();
 
-        if (!number || number < 1) {
-            alert('Please enter a valid room number');
+        if (!roomName || roomName.length > 50) {
+            alert('Please enter a valid room name less than 50 characters');
             return;
         }
 
         if (addRoom(stairway, floor, roomName)) {
             closeAddRoomModal();
-            addRoomNumber.value = '';
+            addRoomName.value = '';
             renderStairways();
             renderStatusSummary();
         } else {
@@ -220,8 +226,8 @@ function openRoomModal(roomId) {
     
     currentRoomId = roomId;
     
-    const displayNumber = `${room.floor}${String(room.number).padStart(2, '0')}`;
-    modalRoomTitle.textContent = `Room ${displayNumber} Details`;
+    const displayName = `${room.name}`;
+    modalRoomTitle.textContent = `${room.name} Details`;
     
     roomStatus.value = room.status;
     roomNotes.value = room.notes || '';
@@ -240,7 +246,7 @@ function closeModal() {
 // Close Add Room modal
 function closeAddRoomModal() {
     addRoomModal.classList.remove('active');
-    addRoomNumber.value = '';
+    addRoomName.value = '';
 }
 
 // Save room changes

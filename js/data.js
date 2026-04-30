@@ -5,11 +5,11 @@ const STORAGE_KEY = 'housekeeping_rooms';
 // Each stairway has a different number of rooms
 const HOTEL_CONFIG = {
     stairways: [
-        { id: 1, name: 'Stairway 51', roomsPerFloor: 8 },
-        { id: 2, name: 'Stairway 49', roomsPerFloor: 10 },
-        { id: 3, name: 'Stairway 47', roomsPerFloor: 6 },
-        { id: 4, name: 'Stairway 45', roomsPerFloor: 12 },
-        { id: 5, name: 'Stairway 43', roomsPerFloor: 9 }
+        { id: 1, name: 'Stairway 51', roomsPerFloor: 1 },
+        { id: 2, name: 'Stairway 49', roomsPerFloor: 1 },
+        { id: 3, name: 'Stairway 47', roomsPerFloor: 1 },
+        { id: 4, name: 'Stairway 45', roomsPerFloor: 1 },
+        { id: 5, name: 'Stairway 43', roomsPerFloor: 1 }
     ],
     floors: [4, 3, 2, 1]
 };
@@ -23,13 +23,13 @@ function generateInitialRooms() {
     
     HOTEL_CONFIG.stairways.forEach(stairway => {
         HOTEL_CONFIG.floors.forEach(floor => {
-            for (let roomNum = 1; roomNum <= stairway.roomsPerFloor; roomNum++) {
-                const roomId = `${stairway.id}-${floor}-${roomNum}`;
+            for (let roomName = 1; roomName <= stairway.roomsPerFloor; roomName++) {
+                const roomId = `${stairway.id}-${floor}-${roomName}`;
                 rooms.push({
                     id: roomId,
                     stairway: stairway.id,
                     floor: floor,
-                    name: String(roomNum),
+                    name: roomName,
                     status: getRandomStatus(),
                     notes: '',
                     guest: '',
@@ -65,7 +65,7 @@ function getRandomStatus() {
     return 'clean';
 }
 
-// Load rooms from localStorage or generate new
+// Load rooms from localStorage or return empty if none stored
 function loadRooms() {
     const stored = localStorage.getItem(STORAGE_KEY);
     
@@ -77,10 +77,9 @@ function loadRooms() {
         }
     }
     
-    // Generate new rooms if none stored
-    const rooms = generateInitialRooms();
-    saveRooms(rooms);
-    return rooms;
+    // Return empty array - no auto-generation
+    // Rooms must be explicitly added via importRooms() or addRoom()
+    return [];
 }
 
 // Save rooms to localStorage
@@ -183,7 +182,7 @@ function getRoomsByLocation() {
         HOTEL_CONFIG.floors.forEach(floor => {
             grouped[stairway.id].floors[floor] = rooms.filter(
                 r => r.stairway === stairway.id && r.floor === floor
-            ).sort((a, b) => parseInt(a.name) - parseInt(b.name));
+            ).sort((a, b) => String(a.name).localeCompare(String(b.name)));
         });
     });
     
@@ -209,13 +208,13 @@ function exportRooms() {
 // Reset all rooms to default state
 function resetAllRooms() {
     localStorage.removeItem(STORAGE_KEY);
-    return generateInitialRooms();
+    return [];
 }
 
 // Add a new room to an existing stairway/floor
-function addRoom(stairwayId, floor, roomNumber) {
+function addRoom(stairwayId, floor, roomName) {
     const rooms = loadRooms();
-    const roomId = `${stairwayId}-${floor}-${roomNumber}`;
+    const roomId = `${stairwayId}-${floor}-${roomName}`;
 
     // Check if room already exists
     if (rooms.find(r => r.id === roomId)) {
@@ -226,7 +225,7 @@ function addRoom(stairwayId, floor, roomNumber) {
         id: roomId,
         stairway: parseInt(stairwayId),
         floor: parseInt(floor),
-        number: String(roomNumber),
+        name: roomName,
         status: 'clean',
         notes: '',
         guest: '',
@@ -236,6 +235,28 @@ function addRoom(stairwayId, floor, roomNumber) {
     rooms.push(newRoom);
     saveRooms(rooms);
     return newRoom;
+}
+
+// Import rooms from a JSON array (e.g., from rooms.json)
+function importRooms(roomList) {
+    if (!Array.isArray(roomList)) {
+        console.error('Invalid room list: expected an array');
+        return false;
+    }
+    
+    const rooms = roomList.map(room => ({
+        id: room.id,
+        stairway: room.stairway,
+        floor: room.floor,
+        name: room.name,
+        status: room.status || 'clean',
+        notes: room.notes || '',
+        guest: room.guest || '',
+        lastUpdated: room.lastUpdated || new Date().toISOString()
+    }));
+    
+    saveRooms(rooms);
+    return true;
 }
 
 // Export functions for use in app.js
@@ -253,6 +274,25 @@ if (typeof module !== 'undefined' && module.exports) {
         getRoomsByLocation,
         exportRooms,
         resetAllRooms,
-        addRoom
+        addRoom,
+        importRooms
+    };
+
+    // Also expose functions globally for browser use
+    if (typeof window !== 'undefined') {
+        window.HOTEL_CONFIG = HOTEL_CONFIG;
+        window.DEFAULT_STATUSES = DEFAULT_STATUSES;
+        window.loadRooms = loadRooms;
+        window.saveRooms = saveRooms;
+        window.getRooms = getRooms;
+        window.getRoom = getRoom;
+        window.updateRoom = updateRoom;
+        window.deleteRoom = deleteRoom;
+        window.getStatusSummary = getStatusSummary;
+        window.getRoomsByLocation = getRoomsByLocation;
+        window.exportRooms = exportRooms;
+        window.resetAllRooms = resetAllRooms;
+        window.addRoom = addRoom;
+        window.importRooms = importRooms;
     };
 }
