@@ -304,8 +304,8 @@ body {
 }
 .room-card.done::before { background: var(--status-done); }
 
-.room-card.service {
-    background: rgba(231, 76, 60, 0.08);
+.room-card.service { 
+    background: rgba(243, 156, 18, 0.08);
     border-left-color: var(--status-service);
 }
 .room-card.service::before { background: var(--status-service); }
@@ -317,7 +317,7 @@ body {
 .room-card.checked::before { background: var(--status-checked); }
 
 .room-card.maintenance {
-    background: rgba(243, 156, 18, 0.08);
+    background: rgba(231, 76, 60, 0.08);
     border-left-color: var(--status-maintenance);
 }
 .room-card.maintenance::before { background: var(--status-maintenance); }
