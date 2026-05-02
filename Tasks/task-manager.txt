@@ -1,14 +1,12 @@
-Update Room Status from
-    ['clean', 'dirty', 'inspected', 'maintenance', 'checkout']
-to
-    ['done', 'dirty', 'checked', 'maintenance', 'checkout', 'occupied']
+To do:
+    - Update Header Buttons from: Refresh, Export to Rota Assignment
+    - Make Summary Cards into Clickable Lists
+    - Add stairway heading colours
+        Colours already in style.css
+    - Add selection menu for cleaned rooms, i.e. bathroom, hoover, mop, bed?
+    - Make rota assignment page for breakfast AND housekeeping
+    - Swap under maintenance, dirty, and needs service
 
-Update Header Buttons from
-    Refresh, Export
-
-Make Summary Cards into Clickable Lists
-
-Add stairway heading colours
-    Colours already in style.css
-
-Make additional notes display on cards
+Done:
+    - Made changes to cards persistent across refresh
+    - Make additional notes display on cards

@@ -9,7 +9,7 @@
 <body>
     <div class="app-container">
         <header class="app-header">
-            <h1>Harrison Housekeeping</h1>
+            <h1>Housekeeping Dashboard</h1>
             <div class="header-controls">
                 <button id="refreshBtn" class="btn btn-secondary">↻ Refresh</button>
                 <button id="exportBtn" class="btn btn-secondary">📋 Export</button>
@@ -18,28 +18,28 @@
 
         <div class="legend">
             <div class="legend-item">
-                <span class="status-dot done"></span>
-                <span>Done</span>
-            </div>
-            <div class="legend-item">
-                <span class="status-dot dirty"></span>
-                <span>Dirty</span>
-            </div>
-            <div class="legend-item">
                 <span class="status-dot checked"></span>
                 <span>Checked</span>
             </div>
             <div class="legend-item">
-                <span class="status-dot maintenance"></span>
-                <span>Maintenance</span>
+                <span class="status-dot done"></span>
+                <span>Done</span>
+            </div>
+            <div class="legend-item">
+                <span class="status-dot service"></span>
+                <span>Service</span>
             </div>
             <div class="legend-item">
                 <span class="status-dot checkout"></span>
-                <span>Checkout</span>
+                <span>Checked Out</span>
             </div>
             <div class="legend-item">
                 <span class="status-dot occupied"></span>
                 <span>Occupied</span>
+            </div>
+            <div class="legend-item">
+                <span class="status-dot maintenance"></span>
+                <span>Under Maintenance</span>
             </div>
         </div>
 
@@ -64,10 +64,10 @@
                     <label for="roomStatus">Status:</label>
                     <select id="roomStatus">
                         <option value="done">Done</option>
-                        <option value="dirty">Dirty</option>
+                        <option value="service">Service</option>
                         <option value="checked">Checked</option>
-                        <option value="maintenance">Maintenance</option>
-                        <option value="checkout">Checkout</option>
+                        <option value="maintenance">Under Maintenance</option>
+                        <option value="checkout">Checked Out</option>
                         <option value="occupied">Occupied</option>
                     </select>
                 </div>

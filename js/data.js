@@ -15,7 +15,7 @@ const HOTEL_CONFIG = {
 };
 
 // Default room statuses
-const DEFAULT_STATUSES = ['done', 'dirty', 'checked', 'maintenance', 'checkout', 'occupied'];
+const DEFAULT_STATUSES = ['done', 'service', 'checked', 'maintenance', 'checkout', 'occupied'];
 
 // Load rooms from localStorage or return empty if none stored
 function loadRooms() {

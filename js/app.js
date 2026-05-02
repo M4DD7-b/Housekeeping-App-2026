@@ -21,14 +21,22 @@ let currentRoomId = null;
 
 // Initialize the app
 async function init() {
-    const roomsData = await fetch('data/rooms.json').then(r => r.json());
-    
-    if (roomsData.rooms && roomsData.rooms.length > 0) {
-        importRooms(roomsData.rooms);
+    const storedRooms = loadRooms();
+
+    if (storedRooms.length > 0) {
+        renderStairways();
+        renderStatusSummary();
+    } else {
+        const roomsData = await fetch('data/rooms.json').then(r => r.json());
+
+        if (roomsData.rooms && roomsData.rooms.length > 0) {
+            importRooms(roomsData.rooms);
+        }
+
+        renderStairways();
+        renderStatusSummary();
     }
-    
-    renderStairways();
-    renderStatusSummary();
+
     setupEventListeners();
 }
 
@@ -42,7 +50,7 @@ function renderStairways() {
         const stairwayEl = document.createElement('div');
         stairwayEl.className = 'stairway';
         stairwayEl.innerHTML = `
-            <div class="stairway-header">${stairwayData.name}</div>
+            <div class="stairway-header stairway-header-${stairwayId}">${stairwayData.name}</div>
             <div class="stairway-rooms" data-stairway="${stairwayId}">
                 ${renderFloorRooms(stairwayData.floors)}
             </div>
@@ -85,6 +93,7 @@ function createRoomCard(room) {
             </div>
             <div class="room-status">${statusLabel}</div>
             ${room.guest ? `<div class="room-guest">${escapeHtml(room.guest)}</div>` : ''}
+            ${room.notes ? `<div class="room-notes">${escapeHtml(room.notes)}</div>` : ''}
         </div>
     `;
 }
@@ -93,10 +102,10 @@ function createRoomCard(room) {
 function getStatusLabel(status) {
     const labels = {
         done: 'Done',
-        dirty: 'Dirty',
+        service: 'Service',
         checked: 'Checked',
-        maintenance: 'Maintenance',
-        checkout: 'Checkout',
+        maintenance: 'Under Maintenance',
+        checkout: 'Checked Out',
         occupied: 'Occupied'
     };
     return labels[status] || status;
@@ -108,10 +117,10 @@ function renderStatusSummary() {
     
     const statusConfig = [
         { key: 'done', label: 'Done' },
-        { key: 'dirty', label: 'Dirty' },
+        { key: 'service', label: 'Service' },
         { key: 'checked', label: 'Checked' },
-        { key: 'maintenance', label: 'Maintenance' },
-        { key: 'checkout', label: 'Checkout' },
+        { key: 'maintenance', label: 'Under Maintenance' },
+        { key: 'checkout', label: 'Checked Out' },
         { key: 'occupied', label: 'Occupied' }
     ];
     

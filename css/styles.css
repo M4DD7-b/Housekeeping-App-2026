@@ -16,9 +16,9 @@
     
     /* Status Colors */
     --status-done: rgb(255, 217, 0);
-    --status-dirty: rgb(231, 76, 60);
+    --status-maintenance: rgb(231, 76, 60);
     --status-checked: rgb(37, 228, 66);
-    --status-maintenance: #f39c12;
+    --status-service: #f39c12;
     --status-checkout: rgb(23, 93, 255);
     --status-occupied: #9b59b6;
     
@@ -137,7 +137,7 @@ body {
 }
 
 .btn-danger {
-    background: var(--status-dirty);
+    background: var(--status-maintenance);
     color: white;
 }
 
@@ -176,7 +176,7 @@ body {
 }
 
 .status-dot.done { background: var(--status-done); }
-.status-dot.dirty { background: var(--status-dirty); }
+.status-dot.service { background: var(--status-service); }
 .status-dot.checked { background: var(--status-checked); }
 .status-dot.maintenance { background: var(--status-maintenance); }
 .status-dot.checkout { background: var(--status-checkout); }
@@ -214,6 +214,26 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
+.stairway-header-1 {
+    background: var(--stairway-1) !important;
+}
+
+.stairway-header-2 {
+    background: var(--stairway-2) !important;
+}
+
+.stairway-header-3 {
+    background: var(--stairway-3) !important;
+}
+
+.stairway-header-4 {
+    background: var(--stairway-4) !important;
+}
+
+.stairway-header-5 {
+    background: var(--stairway-5) !important;
+}
+
 .stairway-rooms {
     display: flex;
     flex-direction: column;
@@ -226,14 +246,13 @@ body {
 
 /* Room Cards */
 .room-card {
-    height: 72px;
-    padding: 10px 14px;
+    height: auto;
+    padding: 14px 16px;
     border-radius: 2px;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     position: relative;
     overflow: hidden;
     border-left: 3px solid transparent;
@@ -259,11 +278,11 @@ body {
 }
 .room-card.done::before { background: var(--status-done); }
 
-.room-card.dirty {
+.room-card.service {
     background: rgba(231, 76, 60, 0.08);
-    border-left-color: var(--status-dirty);
+    border-left-color: var(--status-service);
 }
-.room-card.dirty::before { background: var(--status-dirty); }
+.room-card.service::before { background: var(--status-service); }
 
 .room-card.checked {
     background: rgba(37, 228, 66, 0.08);
@@ -322,12 +341,21 @@ body {
 }
 
 .room-guest {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     color: var(--text-secondary);
-    white-space: nowrap;
     overflow: hidden;
-    text-overflow: ellipsis;
     font-style: italic;
+    line-height: 1.2;
+    margin-top: 2px;
+}
+
+.room-notes {
+    font-size: 0.75rem;
+    color: var(--harrison-charcoal);
+    overflow: hidden;
+    margin-top: 4px;
+    font-weight: 500;
+    line-height: 1.2;
 }
 
 /* Status Summary */
@@ -368,7 +396,7 @@ body {
 }
 
 .summary-card.done .count { color: var(--status-done); }
-.summary-card.dirty .count { color: var(--status-dirty); }
+.summary-card.service .count { color: var(--status-service); }
 .summary-card.checked .count { color: var(--status-checked); }
 .summary-card.maintenance .count { color: var(--status-maintenance); }
 .summary-card.checkout .count { color: var(--status-checkout); }
@@ -510,7 +538,7 @@ body {
     .room-card {
         flex: 1;
         min-width: 80px;
-        height: 60px;
+        height: auto;
     }
     
     .legend {
