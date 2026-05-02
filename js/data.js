@@ -141,26 +141,127 @@ function getRoomsByLocation() {
     return grouped;
 }
 
-// Export rooms data
-function exportRooms() {
-    const rooms = loadRooms();
-    const dataStr = JSON.stringify(rooms, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `housekeeping-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 // Reset all rooms to default state
 function resetAllRooms() {
     localStorage.removeItem(STORAGE_KEY);
     return [];
+}
+
+// Employee and Rota Management
+const EMPLOYEES_KEY = 'housekeeping_employees';
+const ROTA_KEY = 'housekeeping_rota';
+
+// Get all employees
+function getEmployees() {
+    const stored = localStorage.getItem(EMPLOYEES_KEY);
+    
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error('Error parsing stored employees:', e);
+        }
+    }
+    
+    return [];
+}
+
+// Add a new employee
+function addEmployee(name) {
+    const employees = getEmployees();
+    const newEmployee = {
+        id: Date.now().toString(),
+        name: name.trim()
+    };
+    
+    employees.push(newEmployee);
+    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+    return newEmployee;
+}
+
+// Remove an employee
+function removeEmployee(employeeId) {
+    const employees = getEmployees();
+    const filtered = employees.filter(emp => emp.id !== employeeId);
+    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(filtered));
+    
+    // Also remove from rota
+    const rota = getRota();
+    delete rota[employeeId];
+    saveRota(rota);
+}
+
+// Get rota data
+function getRota() {
+    const stored = localStorage.getItem(ROTA_KEY);
+    
+    if (stored) {
+        try {
+            return JSON.parse(stored);
+        } catch (e) {
+            console.error('Error parsing stored rota:', e);
+        }
+    }
+    
+    return {};
+}
+
+// Save rota data
+function saveRota(rota) {
+    localStorage.setItem(ROTA_KEY, JSON.stringify(rota));
+}
+
+// Calculate shift hours from start and end times
+function calculateShiftHours(startTime, endTime) {
+    if (!startTime || !endTime) {
+        return 0;
+    }
+
+    const [startHours, startMinutes] = startTime.split(':').map(Number);
+    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    const start = startHours + startMinutes / 60;
+    const end = endHours + endMinutes / 60;
+    const diff = end - start;
+    return diff > 0 ? Math.round(diff * 100) / 100 : 0;
+}
+
+// Update rota assignment
+function updateRotaAssignment(employeeId, day, assigned, hours) {
+    const rota = getRota();
+    const existing = rota[employeeId]?.[day] || {};
+
+    if (!rota[employeeId]) {
+        rota[employeeId] = {};
+    }
+    
+    rota[employeeId][day] = {
+        assigned: assigned,
+        hours: assigned ? hours : 0,
+        startTime: assigned ? existing.startTime || '' : '',
+        endTime: assigned ? existing.endTime || '' : ''
+    };
+    
+    saveRota(rota);
+}
+
+function updateRotaShiftTimes(employeeId, day, startTime, endTime) {
+    const rota = getRota();
+    
+    if (!rota[employeeId]) {
+        rota[employeeId] = {};
+    }
+
+    const assigned = Boolean(startTime && endTime);
+    const hours = calculateShiftHours(startTime, endTime);
+
+    rota[employeeId][day] = {
+        assigned: assigned,
+        hours: assigned ? hours : 0,
+        startTime: assigned ? startTime : '',
+        endTime: assigned ? endTime : ''
+    };
+
+    saveRota(rota);
 }
 
 // Import rooms from a JSON array (e.g., from rooms.json)
@@ -198,9 +299,15 @@ if (typeof module !== 'undefined' && module.exports) {
         resetRoom,
         getStatusSummary,
         getRoomsByLocation,
-        exportRooms,
         resetAllRooms,
-        importRooms
+        importRooms,
+        getEmployees,
+        addEmployee,
+        removeEmployee,
+        getRota,
+        saveRota,
+        updateRotaAssignment,
+        updateRotaShiftTimes
     };
 
     // Also expose functions globally for browser use
@@ -215,8 +322,15 @@ if (typeof module !== 'undefined' && module.exports) {
         window.resetRoom = resetRoom;
         window.getStatusSummary = getStatusSummary;
         window.getRoomsByLocation = getRoomsByLocation;
-        window.exportRooms = exportRooms;
+
         window.resetAllRooms = resetAllRooms;
+        window.getEmployees = getEmployees;
+        window.addEmployee = addEmployee;
+        window.removeEmployee = removeEmployee;
+        window.getRota = getRota;
+        window.saveRota = saveRota;
+        window.updateRotaAssignment = updateRotaAssignment;
+        window.updateRotaShiftTimes = updateRotaShiftTimes;
         window.importRooms = importRooms;
     };
 }
