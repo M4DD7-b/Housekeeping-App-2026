@@ -9,8 +9,6 @@ To do:
     - Ask about check in information; is this out of scope?
         Arriving today section?? Or Arriving At section??
     - When implementing breakfast:
-        Include guest names or just count?
-        Breakfast dropdown menu?
         What does "Ask" mean on the breakfast sheet?
 
 Done:
@@ -24,3 +22,5 @@ Done:
 03-05-2026
     Update rota grid to improve readability, make into a calendar-like structure
     Make rota cells fit on screen
+    Include guest count (0 - 5) per room
+    Breakfast included checkbox

@@ -91,11 +91,15 @@
                 </div>
                 <div class="form-group">
                     <label for="roomNotes">Notes:</label>
-                    <textarea id="roomNotes" rows="4" placeholder="Add notes about this room..."></textarea>
+                    <textarea id="roomNotes" rows="4" placeholder="Add notes about this room (optional)"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="roomGuest">Guest Name:</label>
-                    <input type="text" id="roomGuest" placeholder="Current guest (optional)">
+                    <label for="roomGuest">Guests:</label>
+                    <input type="number" id="roomGuest" placeholder="Number of guests" min="0" max="5">
+                </div>
+                <div class="form-group form-group-checkbox">
+                    <label for="roomBreakfast">Breakfast Included:</label>
+                    <input type="checkbox" id="roomBreakfast">
                 </div>
                 <div class="form-group">
                     <label>Last Updated:</label>

@@ -93,6 +93,7 @@ function resetRoom(roomId) {
             status: 'checked',
             notes: '',
             guest: '',
+            breakfast: false,
             lastUpdated: new Date().toISOString()
         };
         saveRooms(rooms);

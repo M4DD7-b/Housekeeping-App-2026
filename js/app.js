@@ -28,6 +28,7 @@ const modalRoomTitle = document.getElementById('modalRoomTitle');
 const roomStatus = document.getElementById('roomStatus');
 const roomNotes = document.getElementById('roomNotes');
 const roomGuest = document.getElementById('roomGuest');
+const roomBreakfast = document.getElementById('roomBreakfast');
 const modalLastUpdated = document.getElementById('modalLastUpdated');
 
 let currentRoomId = null;
@@ -98,6 +99,16 @@ function renderFloorRooms(floors) {
 function createRoomCard(room) {
     const statusLabel = getStatusLabel(room.status);
     const displayName = `${room.name}`;
+    
+    const guestText = room.guest > 0 ? `(${room.guest})` : '';
+    
+    // Display breakfast and/or guests
+    let breakfastDisplay = '';
+    if (room.breakfast) {
+        breakfastDisplay = `<div class="room-breakfast">Breakfast Included${guestText ? ' ' + guestText : ''}</div>`;
+    } else if (guestText) {
+        breakfastDisplay = `<div class="room-breakfast">${guestText}</div>`;
+    }
 
     return `
         <div class="room-card ${room.status}" 
@@ -108,7 +119,7 @@ function createRoomCard(room) {
                 <span class="room-floor">Floor ${room.floor}</span>
             </div>
             <div class="room-status">${statusLabel}</div>
-            ${room.guest ? `<div class="room-guest">${escapeHtml(room.guest)}</div>` : ''}
+            ${breakfastDisplay}
             ${room.notes ? `<div class="room-notes">${escapeHtml(room.notes)}</div>` : ''}
         </div>
     `;
@@ -225,7 +236,8 @@ function openRoomModal(roomId) {
     modalRoomTitle.textContent = `${room.name} Details`;
     roomStatus.value = room.status;
     roomNotes.value = room.notes || '';
-    roomGuest.value = room.guest || '';
+    roomGuest.value = room.guest || 0;
+    roomBreakfast.checked = room.breakfast || false;
     modalLastUpdated.textContent = formatDate(room.lastUpdated);
     roomModal.classList.add('active');
 }
@@ -243,7 +255,8 @@ function saveRoomChanges() {
     const updates = {
         status: roomStatus.value,
         notes: roomNotes.value.trim(),
-        guest: roomGuest.value.trim()
+        guest: roomGuest.value,
+        breakfast: roomBreakfast.checked
     };
 
     updateRoom(currentRoomId, updates);
