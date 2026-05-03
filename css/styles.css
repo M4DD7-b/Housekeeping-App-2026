@@ -1,5 +1,5 @@
 /* Housekeeping App Styles */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
     margin: 0;
@@ -8,10 +8,10 @@
 }
 
 :root {
-    --bg-primary: #f5f7fa;
-    --bg-secondary: #ffffff;
-    --text-primary: #2c3e50;
-    --text-secondary: #7f8c8d;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f8f8;
+    --text-primary: #200606;
+    --text-secondary: #666666;
     --border-color: #e1e8ed;
     
     /* Status Colors */
@@ -27,32 +27,16 @@
     --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
     --shadow-lg: 0 8px 24px rgba(0,0,0,0.16);
     
-    /* The Harrison inspired palette */
-    --harrison-green: #1a3a2a;
-    --harrison-navy: #1a2a3a;
-    --harrison-wine: #6b2a3a;
-    --harrison-gold: #c9a962;
-    --harrison-cream: #f4f1ea;
-    --harrison-charcoal: #3a3a3a;
-    --harrison-mahogany: #4a2c2a;
-
-    /* Stairway pallete */
-    --stairway-1: #813E38;
-    --stairway-2: #C48655;
-    --stairway-3: #B25536;
-    --stairway-4: #12110D;
-    --stairway-5: #B9A990;
+    /* Accent */
+    --accent: #200606;
 }
 
 body {
-    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
-    background-color: var(--harrison-cream);
-    color: var(--harrison-charcoal);
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     min-height: 100vh;
     padding: 20px;
-    background-image: 
-        radial-gradient(ellipse at top left, rgba(201, 169, 98, 0.05) 0%, transparent 50%),
-        radial-gradient(ellipse at bottom right, rgba(26, 58, 42, 0.03) 0%, transparent 50%);
 }
 
 .app-container {
@@ -67,31 +51,17 @@ body {
     align-items: center;
     margin-bottom: 24px;
     padding: 24px 32px;
-    background: linear-gradient(135deg, var(--harrison-navy) 0%, var(--harrison-green) 100%);
-    border-radius: 4px;
-    box-shadow: var(--shadow-md);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
-}
-
-.app-header::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    opacity: 0.5;
-    pointer-events: none;
-    z-index: 0;
 }
 
 .app-header h1 {
     font-size: 1.75rem;
     font-weight: 600;
-    color: var(--harrison-cream);
-    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--text-primary);
+    font-family: 'EB Garamond', serif;
     letter-spacing: 1px;
     position: relative;
     z-index: 1;
@@ -117,8 +87,8 @@ body {
 }
 
 .view-tabs .btn.active {
-    background: var(--harrison-gold);
-    color: var(--harrison-navy);
+    background: var(--accent);
+    color: var(--bg-primary);
     box-shadow: var(--shadow-sm);
 }
 
@@ -141,25 +111,25 @@ body {
 }
 
 .btn-primary {
-    background: var(--harrison-gold);
-    color: var(--harrison-navy);
+    background: var(--accent);
+    color: var(--bg-primary);
 }
 
 .btn-primary:hover {
-    background: #d4b872;
+    background: rgba(32, 6, 6, 0.8);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(201, 169, 98, 0.3);
+    box-shadow: 0 4px 12px rgba(32, 6, 6, 0.3);
 }
 
 .btn-secondary {
     background: transparent;
-    color: var(--harrison-cream);
-    border: 1px solid rgba(244, 241, 234, 0.4);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: rgba(244, 241, 234, 0.1);
-    border-color: var(--harrison-cream);
+    background: var(--bg-secondary);
+    border-color: var(--text-secondary);
 }
 
 .btn-danger {
@@ -229,35 +199,15 @@ body {
 .stairway-header {
     text-align: center;
     padding: 16px;
-    background: linear-gradient(135deg, var(--harrison-navy) 0%, var(--harrison-green) 100%);
+    background: var(--bg-secondary);
     border-radius: 2px 2px 0 0;
     font-weight: 500;
-    color: var(--harrison-cream);
-    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--text-primary);
+    font-family: 'EB Garamond', serif;
     font-size: 0.95rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     box-shadow: var(--shadow-sm);
-}
-
-.stairway-header-1 {
-    background: var(--stairway-1) !important;
-}
-
-.stairway-header-2 {
-    background: var(--stairway-2) !important;
-}
-
-.stairway-header-3 {
-    background: var(--stairway-3) !important;
-}
-
-.stairway-header-4 {
-    background: var(--stairway-4) !important;
-}
-
-.stairway-header-5 {
-    background: var(--stairway-5) !important;
 }
 
 .stairway-rooms {
@@ -343,8 +293,8 @@ body {
 .room-name {
     font-weight: 600;
     font-size: 0.95rem;
-    color: var(--harrison-charcoal);
-    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--text-primary);
+    font-family: 'EB Garamond', serif;
 }
 
 .room-floor {
@@ -352,9 +302,9 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', sans-serif;
     padding: 2px 6px;
-    background: rgba(0, 0, 0, 0.04);
+    background: var(--bg-secondary);
     border-radius: 2px;
 }
 
@@ -363,7 +313,7 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .room-guest {
@@ -377,7 +327,7 @@ body {
 
 .room-notes {
     font-size: 0.75rem;
-    color: var(--harrison-charcoal);
+    color: var(--text-primary);
     overflow: hidden;
     margin-top: 4px;
     font-weight: 500;
@@ -410,7 +360,7 @@ body {
     font-size: 2.25rem;
     font-weight: 600;
     margin-bottom: 4px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'EB Garamond', serif;
 }
 
 .summary-card .label {
@@ -418,7 +368,7 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .summary-card.done .count { color: var(--status-done); }
@@ -436,7 +386,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(26, 42, 58, 0.85);
+    background: rgba(32, 6, 6, 0.85);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -447,7 +397,7 @@ body {
 }
 
 .modal-content {
-    background: var(--harrison-cream);
+    background: var(--bg-secondary);
     border-radius: 2px;
     padding: 32px;
     width: 90%;
@@ -456,7 +406,7 @@ body {
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
     position: relative;
-    border: 1px solid rgba(201, 169, 98, 0.3);
+    border: 1px solid var(--border-color);
 }
 
 .modal-close {
@@ -467,18 +417,18 @@ body {
     cursor: pointer;
     color: var(--text-secondary);
     transition: color 0.2s;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'EB Garamond', serif;
 }
 
 .modal-close:hover {
-    color: var(--harrison-gold);
+    color: var(--accent);
 }
 
 .modal-content h2 {
     margin-bottom: 24px;
     font-size: 1.25rem;
-    font-family: 'Playfair Display', Georgia, serif;
-    color: var(--harrison-navy);
+    font-family: 'EB Garamond', serif;
+    color: var(--text-primary);
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 12px;
 }
@@ -495,7 +445,7 @@ body {
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 .form-group select,
@@ -506,9 +456,9 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 2px;
     font-size: 0.95rem;
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Poppins', sans-serif;
     transition: border-color 0.2s;
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
 }
 
 .form-group select:focus,

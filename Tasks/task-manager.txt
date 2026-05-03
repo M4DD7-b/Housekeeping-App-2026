@@ -2,19 +2,25 @@ To do:
     - Simplify colours, reduce cludder
     - Make Summary Cards into clickable lists
     - Make rota assignment page for breakfast AND housekeeping
-        Update rota grid to improve readability, make into a calendar-like structure
         Don't assign hours, assign start and end times
-        Make rota cells fit on screen
         Make rota exportable and printable
         Automatically total up hours during the week
         Make assigning and logging hours easier: what if someone finishes early??
     - Ask about check in information; is this out of scope?
         Arriving today section?? Or Arriving At section??
+    - When implementing breakfast:
+        Include guest names or just count?
+        Breakfast dropdown menu?
+        What does "Ask" mean on the breakfast sheet?
 
 Done:
-    - Made changes to cards persistent across refresh
-    - Make additional notes display on cards
-    - Swap under maintenance, dirty, and needs service
-    - Add stairway heading colours
+03-04-2026
+    Made changes to cards persistent across refresh
+    Make additional notes display on cards
+    Swap under maintenance, dirty, and needs service
+    Add stairway heading colours
         Colours already in style.css
-    - Update Header Buttons from: Refresh, Export to Rota Assignment
+    Update Header Buttons from: Refresh, Export to Rota Assignment
+03-05-2026
+    Update rota grid to improve readability, make into a calendar-like structure
+    Make rota cells fit on screen
