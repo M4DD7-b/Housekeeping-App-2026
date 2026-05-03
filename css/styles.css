@@ -172,7 +172,7 @@ body {
 }
 
 /* Legend */
-.legend {
+.legendContainer {
     display: flex;
     gap: 32px;
     padding: 20px 28px;
@@ -644,8 +644,8 @@ body {
 }
 
 .rota-cell {
-    flex: 0 0 180px;
-    min-width: 180px;
+    flex: 0 0 150px;
+    min-width: 150px;
     padding: 8px 10px;
     display: flex;
     align-items: center;
@@ -659,8 +659,8 @@ body {
 }
 
 .rota-cell.rota-employee {
-    flex: 0 0 180px;
-    min-width: 180px;
+    flex: 0 0 150px;
+    min-width: 150px;
     justify-content: flex-start;
     font-weight: 500;
     background: var(--bg-primary);
@@ -669,8 +669,8 @@ body {
 }
 
 .rota-cell.rota-assignment {
-    flex: 0 0 180px;
-    min-width: 180px;
+    flex: 0 0 150px;
+    min-width: 150px;
 }
 
 .rota-assignment {
@@ -780,7 +780,7 @@ body {
         height: auto;
     }
     
-    .legend {
+    .legendContainer {
         justify-content: center;
     }
     

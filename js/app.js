@@ -10,6 +10,7 @@ const rotaBtn = document.getElementById('rotaBtn');
 const saveRoomBtn = document.getElementById('saveRoomBtn');
 const resetRoomBtn = document.getElementById('resetRoomBtn');
 const addEmployeeBtn = document.getElementById('addEmployeeBtn');
+const legendContainer = document.getElementById('legend');
 
 const dashboardView = document.getElementById('dashboardView');
 const rotaView = document.getElementById('rotaView');
@@ -255,6 +256,7 @@ function saveRoomChanges() {
 function showDashboardView() {
     dashboardView.classList.remove('hidden');
     rotaView.classList.add('hidden');
+    legendContainer.classList.remove('hidden');
     dashboardBtn.classList.add('active');
     rotaBtn.classList.remove('active');
 }
@@ -263,6 +265,7 @@ function showDashboardView() {
 function showRotaView() {
     dashboardView.classList.add('hidden');
     rotaView.classList.remove('hidden');
+    legendContainer.classList.add('hidden');
     dashboardBtn.classList.remove('active');
     rotaBtn.classList.add('active');
     renderEmployees();
