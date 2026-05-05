@@ -507,6 +507,13 @@ body {
     min-height: 80px;
 }
 
+.form-help-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 4px;
+}
+
 .modal-footer {
     display: flex;
     gap: 12px;
@@ -607,14 +614,17 @@ body {
     flex-direction: column;
     gap: 2px;
     width: 100%;
-    max-height: 400px;
+    max-height: 520px;
     overflow-x: auto;
     overflow-y: auto;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 6px;
 }
 
 .rota-row {
     display: flex;
-    min-height: 60px;
+    min-height: 64px;
     min-width: max-content;
     align-items: stretch;
     flex-wrap: nowrap;
@@ -624,18 +634,23 @@ body {
     background: var(--harrison-navy);
     color: var(--harrison-cream);
     font-weight: 600;
-    max-width: max-content;
+}
+
+.rota-header .rota-cell {
+    background: transparent;
+    color: inherit;
 }
 
 .rota-cell {
-    flex: 0 0 150px;
-    min-width: 150px;
-    padding: 8px 10px;
+    flex: 0 0 160px;
+    min-width: 160px;
+    padding: 10px 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     border-right: 1px solid rgba(0,0,0,0.1);
+    background: #fff;
 }
 
 .rota-cell:last-child {
@@ -643,47 +658,94 @@ body {
 }
 
 .rota-cell.rota-employee {
-    flex: 0 0 150px;
-    min-width: 150px;
+    flex: 0 0 180px;
+    min-width: 180px;
     justify-content: flex-start;
-    font-weight: 500;
+    font-weight: 600;
     background: var(--bg-primary);
     color: var(--harrison-charcoal);
     padding-left: 16px;
 }
 
+.rota-cell.rota-day {
+    flex: 0 0 140px;
+    min-width: 140px;
+    background: rgba(247, 249, 252, 0.95);
+}
+
 .rota-cell.rota-assignment {
-    flex: 0 0 150px;
-    min-width: 150px;
+    flex: 0 0 140px;
+    min-width: 140px;
+}
+
+.rota-cell.rota-total-hours {
+    flex: 0 0 120px;
+    min-width: 120px;
+    font-weight: 600;
+    background: rgba(227, 242, 253, 0.8);
+    color: var(--harrison-navy);
+}
+
+.rota-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+#exportScheduleBtn {
+    white-space: nowrap;
 }
 
 .rota-assignment {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 6px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 10px;
     background: var(--bg-primary);
+    min-height: 72px;
+    align-items: center;
+    justify-items: center;
+    text-align: center;
 }
 
-.btn-sm {
-    padding: 4px 8px;
-    font-size: 0.8rem;
-    border-radius: 2px;
-}
-
-.assignment-time-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 4px;
-}
-
-.rota-checkbox {
+.rota-assignment .rota-checkbox {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    font-size: 0.75rem;
+    gap: 8px;
+    width: 100%;
+}
+
+.rota-assignment .hours-input {
+    width: 100%;
+    max-width: 120px;
+}
+
+.shift-time-input {
+    width: 100px;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.time-input-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.assignment-time-label {
+    font-size: 0.8rem;
     color: var(--text-secondary);
+    margin-top: 4px;
+    width: 100%;
+    word-break: break-word;
 }
 
 .time-row {
@@ -775,5 +837,37 @@ body {
     
     .room-floor {
         align-self: flex-end;
+    }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #rotaView, #rotaView * {
+        visibility: visible;
+    }
+
+    #rotaView {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 0;
+    }
+
+    .app-header,
+    .legendContainer,
+    .employees-section,
+    .btn,
+    .rota-header-row button,
+    .modal {
+        display: none !important;
+    }
+
+    .rota-grid {
+        max-height: none;
+        overflow: visible;
     }
 }

@@ -21,6 +21,7 @@ const rotaTimeModalCloseButtons = document.querySelectorAll('.rota-time-modal-cl
 const rotaEmployeeTitle = document.getElementById('rotaEmployeeTitle');
 const rotaTimeBody = document.getElementById('rotaTimeBody');
 const saveRotaTimesBtn = document.getElementById('saveRotaTimesBtn');
+const exportScheduleBtn = document.getElementById('exportScheduleBtn');
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -102,11 +103,11 @@ function createRoomCard(room) {
     
     const guestText = room.guest > 0 ? `(${room.guest})` : '';
     
-    // Display breakfast and/or guests
+    // Display breakfast only when guests exist, otherwise show only guest count if present
     let breakfastDisplay = '';
-    if (room.breakfast) {
-        breakfastDisplay = `<div class="room-breakfast">Breakfast Included${guestText ? ' ' + guestText : ''}</div>`;
-    } else if (guestText) {
+    if (room.guest > 0 && room.breakfast) {
+        breakfastDisplay = `<div class="room-breakfast">Breakfast Included ${guestText}</div>`;
+    } else if (room.guest > 0) {
         breakfastDisplay = `<div class="room-breakfast">${guestText}</div>`;
     }
 
@@ -184,6 +185,8 @@ function setupEventListeners() {
         }
     });
 
+    roomGuest.addEventListener('input', handleGuestInputChange);
+
     resetRoomBtn.addEventListener('click', () => {
         if (currentRoomId && confirm('Reset this room to checked status?')) {
             resetRoom(currentRoomId);
@@ -219,6 +222,7 @@ function setupEventListeners() {
     rotaTimeModalCloseButtons.forEach(button => button.addEventListener('click', closeRotaTimeModal));
     saveRotaTimesBtn.addEventListener('click', saveRotaTimeSettings);
     rotaTimeBody.addEventListener('change', handleRotaTimeBodyChange);
+    exportScheduleBtn.addEventListener('click', exportSchedule);
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && roomModal.classList.contains('active')) {
@@ -237,7 +241,9 @@ function openRoomModal(roomId) {
     roomStatus.value = room.status;
     roomNotes.value = room.notes || '';
     roomGuest.value = room.guest || 0;
-    roomBreakfast.checked = room.breakfast || false;
+    const guestCount = Number(roomGuest.value);
+    roomBreakfast.checked = guestCount > 0 && (room.breakfast || false);
+    roomBreakfast.disabled = guestCount <= 0;
     modalLastUpdated.textContent = formatDate(room.lastUpdated);
     roomModal.classList.add('active');
 }
@@ -252,17 +258,50 @@ function closeModal() {
 function saveRoomChanges() {
     if (!currentRoomId) return;
 
+    const guestValue = roomGuest.value;
+    const guestNumber = Number(guestValue);
+
+    if (guestValue.trim() === '' || Number.isNaN(guestNumber)) {
+        alert('Please enter the number of guests for this room.');
+        roomGuest.focus();
+        return;
+    }
+
+    if (guestNumber < 0) {
+        alert('Number of guests cannot be negative.');
+        roomGuest.focus();
+        return;
+    }
+
+    if (roomBreakfast.checked && guestNumber === 0) {
+        alert('Breakfast can only be included when there is at least one guest.');
+        roomBreakfast.checked = false;
+        roomBreakfast.disabled = true;
+        roomGuest.focus();
+        return;
+    }
+
     const updates = {
         status: roomStatus.value,
         notes: roomNotes.value.trim(),
-        guest: roomGuest.value,
-        breakfast: roomBreakfast.checked
+        guest: guestNumber,
+        breakfast: roomBreakfast.checked && guestNumber > 0
     };
 
     updateRoom(currentRoomId, updates);
     closeModal();
     renderStairways();
     renderStatusSummary();
+}
+
+function handleGuestInputChange() {
+    const guestNumber = Number(roomGuest.value);
+    if (Number.isNaN(guestNumber) || guestNumber <= 0) {
+        roomBreakfast.checked = false;
+        roomBreakfast.disabled = true;
+    } else {
+        roomBreakfast.disabled = false;
+    }
 }
 
 // Show dashboard view
@@ -348,6 +387,7 @@ function renderRotaGrid() {
         headerRow.innerHTML += `<div class="rota-cell rota-day">${day}</div>`;
     });
 
+    headerRow.innerHTML += '<div class="rota-cell rota-total-hours">Total Hours</div>';
     rotaGrid.appendChild(headerRow);
 
     employees.forEach(employee => {
@@ -380,6 +420,13 @@ function renderRotaGrid() {
             `;
         });
 
+        const totalHours = days.reduce((sum, day) => {
+            const dayKey = day.toLowerCase();
+            return sum + (rota[employee.id]?.[dayKey]?.hours || 0);
+        }, 0);
+        const totalDisplay = totalHours ? `${Math.round(totalHours * 100) / 100}h` : '';
+        employeeRow.innerHTML += `<div class="rota-cell rota-total-hours">${totalDisplay}</div>`;
+
         rotaGrid.appendChild(employeeRow);
     });
 
@@ -406,6 +453,10 @@ function handleRotaTimeBodyChange(e) {
             endInput.value = '';
         }
     }
+}
+
+function exportSchedule() {
+    window.print();
 }
 
 function openRotaTimeModal(employeeId) {

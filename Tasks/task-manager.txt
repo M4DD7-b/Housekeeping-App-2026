@@ -1,5 +1,4 @@
 To do:
-    - Simplify colours, reduce cludder
     - Make Summary Cards into clickable lists
     - Make rota assignment page for breakfast AND housekeeping
         Don't assign hours, assign start and end times
@@ -10,6 +9,7 @@ To do:
         Arriving today section?? Or Arriving At section??
     - When implementing breakfast:
         What does "Ask" mean on the breakfast sheet?
+    - Make employee and rota assignments permanent or semi-transient for rota??
 
 Done:
 03-04-2026
