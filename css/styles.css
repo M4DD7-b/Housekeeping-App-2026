@@ -15,7 +15,7 @@
     --border-color: #d8d2c8;
     
     /* Status Colors */
-    --status-done: #c47e00;
+    --status-done: rgb(45, 154, 160);
     --status-maintenance: #bf1f2b;
     --status-checked: #1f7a28;
     --status-service: #d97706;
@@ -311,7 +311,7 @@ h1, h2, h3 {
 }
 
 .room-card.done {
-    background: rgba(196, 126, 0, 0.12);
+    background: rgba(45, 154, 160, 0.12);
     border-left-color: var(--status-done);
 }
 .room-card.done::before { background: var(--status-done); }

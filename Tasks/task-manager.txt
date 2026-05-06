@@ -23,6 +23,5 @@ Done:
     Make rota exportable and printable
     Make rota assignment page for housekeeping
     Don't assign hours, assign start and end times
-    Created early check-in with optional time inclusion
     Made mobile accessible
     Made separate apartments tab
