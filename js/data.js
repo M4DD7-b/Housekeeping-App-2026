@@ -5,11 +5,12 @@ const STORAGE_KEY = 'housekeeping_rooms';
 // Each stairway has a different number of rooms
 const HOTEL_CONFIG = {
     stairways: [
-        { id: 1, name: 'Stairway 51', roomsPerFloor: 1 },
-        { id: 2, name: 'Stairway 49', roomsPerFloor: 1 },
-        { id: 3, name: 'Stairway 47', roomsPerFloor: 1 },
-        { id: 4, name: 'Stairway 45', roomsPerFloor: 1 },
-        { id: 5, name: 'Stairway 43', roomsPerFloor: 1 }
+        { id: 1, name: 'Stairway 51', roomsPerFloor: 1, area: 'main' },
+        { id: 2, name: 'Stairway 49', roomsPerFloor: 1, area: 'main' },
+        { id: 3, name: 'Stairway 47', roomsPerFloor: 1, area: 'main' },
+        { id: 4, name: 'Stairway 45', roomsPerFloor: 1, area: 'main' },
+        { id: 5, name: 'Stairway 43', roomsPerFloor: 1, area: 'main' },
+        { id: 6, name: 'Apartments', roomsPerFloor: 1, area: 'apartments' }
     ],
     floors: [4, 3, 2, 1]
 };
@@ -104,16 +105,19 @@ function resetRoom(roomId) {
 }
 
 // Get status summary
-function getStatusSummary() {
+function getStatusSummary(area = 'main') {
     const rooms = loadRooms();
     const summary = {};
-    
+    const allowedStairwayIds = HOTEL_CONFIG.stairways
+        .filter(stairway => stairway.area === area)
+        .map(stairway => stairway.id);
+
     DEFAULT_STATUSES.forEach(status => {
         summary[status] = 0;
     });
     
     rooms.forEach(room => {
-        if (summary[room.status] !== undefined) {
+        if (allowedStairwayIds.includes(room.stairway) && summary[room.status] !== undefined) {
             summary[room.status]++;
         }
     });
@@ -122,22 +126,24 @@ function getStatusSummary() {
 }
 
 // Get rooms grouped by stairway and floor
-function getRoomsByLocation() {
+function getRoomsByLocation(area = 'main') {
     const rooms = loadRooms();
     const grouped = {};
     
-    HOTEL_CONFIG.stairways.forEach(stairway => {
-        grouped[stairway.id] = {
-            name: stairway.name,
-            floors: {}
-        };
-        
-        HOTEL_CONFIG.floors.forEach(floor => {
-            grouped[stairway.id].floors[floor] = rooms.filter(
-                r => r.stairway === stairway.id && r.floor === floor
-            ).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    HOTEL_CONFIG.stairways
+        .filter(stairway => stairway.area === area)
+        .forEach(stairway => {
+            grouped[stairway.id] = {
+                name: stairway.name,
+                floors: {}
+            };
+            
+            HOTEL_CONFIG.floors.forEach(floor => {
+                grouped[stairway.id].floors[floor] = rooms.filter(
+                    r => r.stairway === stairway.id && r.floor === floor
+                ).sort((a, b) => String(a.name).localeCompare(String(b.name)));
+            });
         });
-    });
     
     return grouped;
 }
@@ -280,6 +286,8 @@ function importRooms(roomList) {
         status: room.status || 'checked',
         notes: room.notes || '',
         guest: room.guest || '',
+        breakfast: room.breakfast || false,
+        area: room.area || 'main',
         lastUpdated: room.lastUpdated || new Date().toISOString()
     }));
     

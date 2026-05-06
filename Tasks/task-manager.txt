@@ -1,16 +1,11 @@
 To do:
-    - Make Summary Cards into clickable lists
-    - Make rota assignment page for breakfast AND housekeeping
-        Don't assign hours, assign start and end times
-        Make rota exportable and printable
-        Automatically total up hours during the week
-        Make assigning and logging hours easier: what if someone finishes early??
-    - Ask about check in information; is this out of scope?
-        Arriving today section?? Or Arriving At section??
-    - When implementing breakfast:
-        What does "Ask" mean on the breakfast sheet?
-    - Make employee and rota assignments permanent or semi-transient for rota??
-
+    Functionality:
+        - Make Summary Cards into clickable lists
+            Make assigning and logging hours easier: what if someone finishes early??
+    Deployment:
+        Convert the vanilla JS web app into a multi-device application with centralized data synchronization.
+        Replace localStorage with a backend API, wrap for PC using Electron, and rebuild for mobile using React Native.
+        Deploy privately with direct installation.
 Done:
 03-04-2026
     Made changes to cards persistent across refresh
@@ -24,3 +19,10 @@ Done:
     Make rota cells fit on screen
     Include guest count (0 - 5) per room
     Breakfast included checkbox
+03-06-2026
+    Make rota exportable and printable
+    Make rota assignment page for housekeeping
+    Don't assign hours, assign start and end times
+    Created early check-in with optional time inclusion
+    Made mobile accessible
+    Made separate apartments tab

@@ -11,6 +11,8 @@ const saveRoomBtn = document.getElementById('saveRoomBtn');
 const resetRoomBtn = document.getElementById('resetRoomBtn');
 const addEmployeeBtn = document.getElementById('addEmployeeBtn');
 const legendContainer = document.getElementById('legend');
+const mainAreaBtn = document.getElementById('mainAreaBtn');
+const apartmentsAreaBtn = document.getElementById('apartmentsAreaBtn');
 
 const dashboardView = document.getElementById('dashboardView');
 const rotaView = document.getElementById('rotaView');
@@ -34,45 +36,82 @@ const modalLastUpdated = document.getElementById('modalLastUpdated');
 
 let currentRoomId = null;
 let currentTimeModalEmployeeId = null;
+let currentDashboardArea = 'main';
 
 // Initialize the app
 async function init() {
     let storedRooms = loadRooms();
 
-    if (storedRooms.length === 0) {
-        try {
-            const response = await fetch('data/rooms.json');
-            if (response.ok) {
-                const roomsData = await response.json();
-                if (roomsData.rooms && roomsData.rooms.length > 0) {
+    try {
+        const response = await fetch('data/rooms.json');
+        if (response.ok) {
+            const roomsData = await response.json();
+            if (roomsData.rooms && roomsData.rooms.length > 0) {
+                if (storedRooms.length === 0) {
                     importRooms(roomsData.rooms);
+                } else {
+                    mergeMissingRooms(roomsData.rooms, storedRooms);
                 }
-            } else {
-                console.warn('Unable to fetch rooms.json:', response.status, response.statusText);
             }
-        } catch (error) {
-            console.error('Error loading room data:', error);
+        } else {
+            console.warn('Unable to fetch rooms.json:', response.status, response.statusText);
         }
-
-        storedRooms = loadRooms();
+    } catch (error) {
+        console.error('Error loading room data:', error);
     }
+
+    storedRooms = loadRooms();
 
     renderStairways();
     renderStatusSummary();
     showDashboardView();
     setupEventListeners();
+    updateDashboardAreaButtons();
+}
+
+function mergeMissingRooms(roomList, storedRooms) {
+    const storedIds = new Set(storedRooms.map(room => room.id));
+    const missingRooms = roomList
+        .filter(room => !storedIds.has(room.id))
+        .map(room => ({
+            id: room.id,
+            stairway: room.stairway,
+            floor: room.floor,
+            name: room.name,
+            status: room.status || 'checked',
+            notes: room.notes || '',
+            guest: room.guest || '',
+            breakfast: room.breakfast || false,
+            area: room.area || 'main',
+            lastUpdated: room.lastUpdated || new Date().toISOString()
+        }));
+
+    if (missingRooms.length > 0) {
+        saveRooms([...storedRooms, ...missingRooms]);
+    }
 }
 
 // Render all stairways with their rooms
 function renderStairways() {
-    const roomsByLocation = getRoomsByLocation();
+    const roomsByLocation = getRoomsByLocation(currentDashboardArea);
     stairwaysContainer.innerHTML = '';
+
+    const stairwayIds = Object.keys(roomsByLocation);
+    if (stairwayIds.length === 0) {
+        stairwaysContainer.innerHTML = '<div class="empty-state">No rooms available for this view.</div>';
+        return;
+    }
 
     for (const [stairwayId, stairwayData] of Object.entries(roomsByLocation)) {
         const stairwayEl = document.createElement('div');
         stairwayEl.className = 'stairway';
         stairwayEl.innerHTML = `
-            <div class="stairway-header stairway-header-${stairwayId}">${stairwayData.name}</div>
+            <div class="stairway-header stairway-header-${stairwayId}">
+                <button class="stairway-toggle" type="button" aria-expanded="false">
+                    <span>${stairwayData.name}</span>
+                    <span class="stairway-toggle-arrow">▾</span>
+                </button>
+            </div>
             <div class="stairway-rooms" data-stairway="${stairwayId}">
                 ${renderFloorRooms(stairwayData.floors)}
             </div>
@@ -141,7 +180,7 @@ function getStatusLabel(status) {
 
 // Render status summary cards
 function renderStatusSummary() {
-    const summary = getStatusSummary();
+    const summary = getStatusSummary(currentDashboardArea);
     const statusConfig = [
         { key: 'done', label: 'Done' },
         { key: 'service', label: 'Service' },
@@ -162,6 +201,18 @@ function renderStatusSummary() {
 // Setup event listeners
 function setupEventListeners() {
     stairwaysContainer.addEventListener('click', (e) => {
+        const toggleButton = e.target.closest('.stairway-toggle');
+        if (toggleButton) {
+            const stairway = toggleButton.closest('.stairway');
+            const rooms = stairway.querySelector('.stairway-rooms');
+            const expanded = stairway.classList.toggle('open');
+            toggleButton.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            if (rooms) {
+                rooms.style.display = expanded ? 'flex' : 'none';
+            }
+            return;
+        }
+
         const roomCard = e.target.closest('.room-card');
         if (roomCard) {
             openRoomModal(roomCard.dataset.roomId);
@@ -178,6 +229,8 @@ function setupEventListeners() {
 
     dashboardBtn.addEventListener('click', showDashboardView);
     rotaBtn.addEventListener('click', showRotaView);
+    mainAreaBtn.addEventListener('click', () => switchDashboardArea('main'));
+    apartmentsAreaBtn.addEventListener('click', () => switchDashboardArea('apartments'));
 
     saveRoomBtn.addEventListener('click', () => {
         if (currentRoomId) {
@@ -311,6 +364,20 @@ function showDashboardView() {
     legendContainer.classList.remove('hidden');
     dashboardBtn.classList.add('active');
     rotaBtn.classList.remove('active');
+    updateDashboardAreaButtons();
+}
+
+function switchDashboardArea(area) {
+    if (currentDashboardArea === area) return;
+    currentDashboardArea = area;
+    renderStairways();
+    renderStatusSummary();
+    updateDashboardAreaButtons();
+}
+
+function updateDashboardAreaButtons() {
+    mainAreaBtn.classList.toggle('active', currentDashboardArea === 'main');
+    apartmentsAreaBtn.classList.toggle('active', currentDashboardArea === 'apartments');
 }
 
 // Show rota view
@@ -405,16 +472,13 @@ function renderRotaGrid() {
             const assignment = rota[employee.id]?.[dayKey] || { assigned: false, hours: 0, startTime: '', endTime: '' };
             const timeLabel = assignment.assigned && assignment.startTime && assignment.endTime
                 ? `${assignment.startTime}–${assignment.endTime}`
-                : assignment.assigned && assignment.hours
-                    ? `${assignment.hours}h`
-                    : '';
+                : '';
             employeeRow.innerHTML += `
                 <div class="rota-cell rota-assignment" data-employee-id="${employee.id}" data-day="${dayKey}">
                     <label class="rota-checkbox">
                         <input type="checkbox" class="assignment-checkbox" ${assignment.assigned ? 'checked' : ''}>
                         <span>Assign</span>
                     </label>
-                    <input type="number" min="0" max="24" value="${assignment.hours}" class="hours-input" ${assignment.assigned ? '' : 'disabled'}>
                     <div class="assignment-time-label">${timeLabel}</div>
                 </div>
             `;
@@ -432,10 +496,6 @@ function renderRotaGrid() {
 
     document.querySelectorAll('.assignment-checkbox').forEach(checkbox => {
         checkbox.addEventListener('change', handleAssignmentChange);
-    });
-
-    document.querySelectorAll('.hours-input').forEach(input => {
-        input.addEventListener('change', handleHoursChange);
     });
 }
 
@@ -531,23 +591,9 @@ function handleAssignmentChange(e) {
     const employeeId = cell.dataset.employeeId;
     const day = cell.dataset.day;
     const assigned = e.target.checked;
-    const hoursInput = cell.querySelector('.hours-input');
 
-    hoursInput.disabled = !assigned;
-    if (!assigned) {
-        hoursInput.value = 0;
-    }
-
-    updateRotaAssignment(employeeId, day, assigned, parseInt(hoursInput.value) || 0);
-}
-
-function handleHoursChange(e) {
-    const cell = e.target.closest('.rota-assignment');
-    const employeeId = cell.dataset.employeeId;
-    const day = cell.dataset.day;
-    const hours = parseInt(e.target.value) || 0;
-
-    updateRotaAssignment(employeeId, day, true, hours);
+    updateRotaAssignment(employeeId, day, assigned, 0);
+    renderRotaGrid();
 }
 
 // Initialize when DOM is ready
