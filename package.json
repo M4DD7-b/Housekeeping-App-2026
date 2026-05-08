@@ -1,22 +1,5 @@
 {
-  "dependencies": {
-    "@supabase/ssr": "^0.10.2",
-    "@supabase/supabase-js": "^2.105.3",
-    "next": "^16.2.5",
-    "nvm": "^0.0.4",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "vercel": "^50.41.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.6.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
-  },
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  }
+  "name": "housekeeping-app",
+  "version": "1.0.0",
+  "private": true
 }
