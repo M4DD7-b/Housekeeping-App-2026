@@ -3,9 +3,7 @@ To do:
         - Make Summary Cards into clickable lists
             Make assigning and logging hours easier: what if someone finishes early??
     Deployment:
-        Convert the vanilla JS web app into a multi-device application with centralized data synchronization.
-        Replace localStorage with a backend API, wrap for PC using Electron, and rebuild for mobile using React Native.
-        Deploy privately with direct installation.
+    `
 Done:
 03-04-2026
     Made changes to cards persistent across refresh

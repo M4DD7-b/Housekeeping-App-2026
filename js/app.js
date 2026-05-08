@@ -1,5 +1,23 @@
 // Housekeeping App - Interactive UI Logic
 
+import { supabase } from './supabase.js';
+
+// This file manages the user interface interactions, including rendering rooms, handling modals, and managing the rota.
+import {
+    getRoom,
+    updateRoom,
+    resetRoom,
+    getRoomsByLocation,
+    getStatusSummary,
+    addEmployee,
+    getEmployees,
+    getRota,
+    updateRotaAssignment,
+    calculateShiftHours,
+    removeEmployee,
+    updateRotaShiftTimes
+} from './data.js';
+
 // DOM Elements
 const stairwaysContainer = document.getElementById('stairwaysContainer');
 const statusSummary = document.getElementById('statusSummary');
@@ -40,60 +58,32 @@ let currentDashboardArea = 'main';
 
 // Initialize the app
 async function init() {
-    let storedRooms = loadRooms();
+    await renderStairways();
+    await renderStatusSummary();
+    await showDashboardView();
+    await setupEventListeners();
+    await updateDashboardAreaButtons();
 
-    try {
-        const response = await fetch('data/rooms.json');
-        if (response.ok) {
-            const roomsData = await response.json();
-            if (roomsData.rooms && roomsData.rooms.length > 0) {
-                if (storedRooms.length === 0) {
-                    importRooms(roomsData.rooms);
-                } else {
-                    mergeMissingRooms(roomsData.rooms, storedRooms);
-                }
-            }
-        } else {
-            console.warn('Unable to fetch rooms.json:', response.status, response.statusText);
+    supabase
+    .channel('rooms-channel')
+    .on(
+        'postgres_changes',
+        {
+            event: '*',
+            schema: 'public',
+            table: 'rooms'
+        },
+        async () => {
+            await renderStairways();
+            await renderStatusSummary();
         }
-    } catch (error) {
-        console.error('Error loading room data:', error);
-    }
-
-    storedRooms = loadRooms();
-
-    renderStairways();
-    renderStatusSummary();
-    showDashboardView();
-    setupEventListeners();
-    updateDashboardAreaButtons();
-}
-
-function mergeMissingRooms(roomList, storedRooms) {
-    const storedIds = new Set(storedRooms.map(room => room.id));
-    const missingRooms = roomList
-        .filter(room => !storedIds.has(room.id))
-        .map(room => ({
-            id: room.id,
-            stairway: room.stairway,
-            floor: room.floor,
-            name: room.name,
-            status: room.status || 'checked',
-            notes: room.notes || '',
-            guest: room.guest || '',
-            breakfast: room.breakfast || false,
-            area: room.area || 'main',
-            lastUpdated: room.lastUpdated || new Date().toISOString()
-        }));
-
-    if (missingRooms.length > 0) {
-        saveRooms([...storedRooms, ...missingRooms]);
-    }
+    )
+    .subscribe();
 }
 
 // Render all stairways with their rooms
-function renderStairways() {
-    const roomsByLocation = getRoomsByLocation(currentDashboardArea);
+async function renderStairways() {
+    const roomsByLocation = await getRoomsByLocation(currentDashboardArea);
     stairwaysContainer.innerHTML = '';
 
     const stairwayIds = Object.keys(roomsByLocation);
@@ -179,8 +169,8 @@ function getStatusLabel(status) {
 }
 
 // Render status summary cards
-function renderStatusSummary() {
-    const summary = getStatusSummary(currentDashboardArea);
+async function renderStatusSummary() {
+    const summary = await getStatusSummary(currentDashboardArea);
     const statusConfig = [
         { key: 'done', label: 'Done' },
         { key: 'service', label: 'Service' },
@@ -199,7 +189,7 @@ function renderStatusSummary() {
 }
 
 // Setup event listeners
-function setupEventListeners() {
+async function setupEventListeners() {
     stairwaysContainer.addEventListener('click', (e) => {
         const toggleButton = e.target.closest('.stairway-toggle');
         if (toggleButton) {
@@ -240,21 +230,21 @@ function setupEventListeners() {
 
     roomGuest.addEventListener('input', handleGuestInputChange);
 
-    resetRoomBtn.addEventListener('click', () => {
+    resetRoomBtn.addEventListener('click', async () => {
         if (currentRoomId && confirm('Reset this room to checked status?')) {
-            resetRoom(currentRoomId);
+            await resetRoom(currentRoomId);
             closeModal();
-            renderStairways();
-            renderStatusSummary();
+            await renderStairways();
+            await renderStatusSummary();
         }
     });
 
-    addEmployeeBtn.addEventListener('click', () => {
+    addEmployeeBtn.addEventListener('click', async () => {
         const employeeName = prompt('Enter employee name:');
         if (employeeName && employeeName.trim()) {
-            addEmployee(employeeName.trim());
-            renderEmployees();
-            renderRotaGrid();
+            await addEmployee(employeeName.trim());
+            await renderEmployees();
+            await renderRotaGrid();
         }
     });
 
@@ -265,10 +255,10 @@ function setupEventListeners() {
         }
     });
 
-    rotaGrid.addEventListener('click', (e) => {
+    rotaGrid.addEventListener('click', async (e) => {
         const nameButton = e.target.closest('.employee-name-btn');
         if (nameButton) {
-            openRotaTimeModal(nameButton.dataset.employeeId);
+            await openRotaTimeModal(nameButton.dataset.employeeId);
         }
     });
 
@@ -285,8 +275,8 @@ function setupEventListeners() {
 }
 
 // Open room modal
-function openRoomModal(roomId) {
-    const room = getRoom(roomId);
+async function openRoomModal(roomId) {
+    const room = await getRoom(roomId);
     if (!room) return;
 
     currentRoomId = roomId;
@@ -297,7 +287,7 @@ function openRoomModal(roomId) {
     const guestCount = Number(roomGuest.value);
     roomBreakfast.checked = guestCount > 0 && (room.breakfast || false);
     roomBreakfast.disabled = guestCount <= 0;
-    modalLastUpdated.textContent = formatDate(room.lastUpdated);
+    modalLastUpdated.textContent = formatDate(room.last_updated);
     roomModal.classList.add('active');
 }
 
@@ -308,7 +298,7 @@ function closeModal() {
 }
 
 // Save room changes
-function saveRoomChanges() {
+async function saveRoomChanges() {
     if (!currentRoomId) return;
 
     const guestValue = roomGuest.value;
@@ -341,10 +331,10 @@ function saveRoomChanges() {
         breakfast: roomBreakfast.checked && guestNumber > 0
     };
 
-    updateRoom(currentRoomId, updates);
+    await updateRoom(currentRoomId, updates);
     closeModal();
-    renderStairways();
-    renderStatusSummary();
+    await renderStairways();
+    await renderStatusSummary();
 }
 
 function handleGuestInputChange() {
@@ -358,37 +348,37 @@ function handleGuestInputChange() {
 }
 
 // Show dashboard view
-function showDashboardView() {
+async function showDashboardView() {
     dashboardView.classList.remove('hidden');
     rotaView.classList.add('hidden');
     legendContainer.classList.remove('hidden');
     dashboardBtn.classList.add('active');
     rotaBtn.classList.remove('active');
-    updateDashboardAreaButtons();
+    await updateDashboardAreaButtons();
 }
 
-function switchDashboardArea(area) {
+async function switchDashboardArea(area) {
     if (currentDashboardArea === area) return;
     currentDashboardArea = area;
-    renderStairways();
-    renderStatusSummary();
-    updateDashboardAreaButtons();
+    await renderStairways();
+    await renderStatusSummary();
+    await updateDashboardAreaButtons();
 }
 
-function updateDashboardAreaButtons() {
+async function updateDashboardAreaButtons() {
     mainAreaBtn.classList.toggle('active', currentDashboardArea === 'main');
     apartmentsAreaBtn.classList.toggle('active', currentDashboardArea === 'apartments');
 }
 
 // Show rota view
-function showRotaView() {
+async function showRotaView() {
     dashboardView.classList.add('hidden');
     rotaView.classList.remove('hidden');
     legendContainer.classList.add('hidden');
     dashboardBtn.classList.remove('active');
     rotaBtn.classList.add('active');
-    renderEmployees();
-    renderRotaGrid();
+    await renderEmployees();
+    await renderRotaGrid();
 }
 
 // Format date for display
@@ -412,36 +402,40 @@ function escapeHtml(text) {
 }
 
 // Rota Management Functions
-function renderEmployees() {
-    const employees = getEmployees();
+async function renderEmployees() {
+    const employees = await getEmployees();
+
     employeesList.innerHTML = '';
 
     employees.forEach(employee => {
         const employeeEl = document.createElement('div');
         employeeEl.className = 'employee-item';
+
         employeeEl.innerHTML = `
-            <button type="button" class="employee-name-btn">${escapeHtml(employee.name)}</button>
-            <button class="btn btn-danger btn-sm remove-employee" data-employee-id="${employee.id}">×</button>
+            <button type="button" class="employee-name-btn" data-employee-id="${employee.id}">
+                ${escapeHtml(employee.name)}
+            </button>
+            <button type="button" class="remove-employee-btn" data-employee-id="${employee.id}" title="Remove Employee">✕</button>
         `;
-        employeeEl.querySelector('.employee-name-btn').dataset.employeeId = employee.id;
+
         employeesList.appendChild(employeeEl);
     });
 
-    document.querySelectorAll('.remove-employee').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const employeeId = e.target.dataset.employeeId;
-            if (confirm('Remove this employee from the rota?')) {
-                removeEmployee(employeeId);
-                renderEmployees();
-                renderRotaGrid();
+    document.querySelectorAll('.remove-employee-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const employeeId = Number(e.target.dataset.employeeId);
+            if (confirm('Are you sure you want to remove this employee?')) {
+                await removeEmployee(employeeId);
+                await renderEmployees();
+                await renderRotaGrid();
             }
         });
     });
 }
 
-function renderRotaGrid() {
-    const employees = getEmployees();
-    const rota = getRota();
+async function renderRotaGrid() {
+    const employees = await getEmployees();
+    const rota = await getRota();
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     rotaGrid.innerHTML = '';
@@ -469,9 +463,13 @@ function renderRotaGrid() {
 
         days.forEach(day => {
             const dayKey = day.toLowerCase();
-            const assignment = rota[employee.id]?.[dayKey] || { assigned: false, hours: 0, startTime: '', endTime: '' };
-            const timeLabel = assignment.assigned && assignment.startTime && assignment.endTime
-                ? `${assignment.startTime}–${assignment.endTime}`
+            const assignment = rota.find(r =>
+                r.employee_id === employee.id &&
+                r.day === dayKey
+            ) || { assigned: false, hours: 0, start_time: '', end_time: '' };
+
+            const timeLabel = assignment.assigned && assignment.start_time && assignment.end_time
+    ? `${assignment.start_time}–${assignment.end_time}`
                 : '';
             employeeRow.innerHTML += `
                 <div class="rota-cell rota-assignment" data-employee-id="${employee.id}" data-day="${dayKey}">
@@ -486,7 +484,11 @@ function renderRotaGrid() {
 
         const totalHours = days.reduce((sum, day) => {
             const dayKey = day.toLowerCase();
-            return sum + (rota[employee.id]?.[dayKey]?.hours || 0);
+            const assignment = rota.find(r =>
+                r.employee_id === employee.id &&
+                r.day === dayKey
+            );
+            return sum + (assignment?.hours || 0);
         }, 0);
         const totalDisplay = totalHours ? `${Math.round(totalHours * 100) / 100}h` : '';
         employeeRow.innerHTML += `<div class="rota-cell rota-total-hours">${totalDisplay}</div>`;
@@ -499,7 +501,7 @@ function renderRotaGrid() {
     });
 }
 
-function handleRotaTimeBodyChange(e) {
+async function handleRotaTimeBodyChange(e) {
     const checkbox = e.target.closest('.time-assigned-checkbox');
     if (checkbox) {
         const row = checkbox.closest('.time-row');
@@ -519,33 +521,53 @@ function exportSchedule() {
     window.print();
 }
 
-function openRotaTimeModal(employeeId) {
-    const employee = getEmployees().find(emp => emp.id === employeeId);
+async function openRotaTimeModal(employeeId) {
+    const employees = await getEmployees();
+    const employee = employees.find(emp => emp.id === Number(employeeId));
+    
     if (!employee) return;
 
     currentTimeModalEmployeeId = employeeId;
-    rotaEmployeeTitle.textContent = `${employee.name} Shift Times`;
-    const rota = getRota();
-    const employeeRota = rota[employeeId] || {};
+    rotaEmployeeTitle.textContent = `Edit Schedule for ${employee.name}`;
 
+    const rota = await getRota();
+    
     rotaTimeBody.innerHTML = '';
 
     daysOfWeek.forEach(day => {
         const dayKey = day.toLowerCase();
-        const assignment = employeeRota[dayKey] || { assigned: false, hours: 0, startTime: '', endTime: '' };
+
+        const assignment = rota.find(r =>
+            r.employee_id === employee.id &&
+            r.day === dayKey
+        );
 
         const row = document.createElement('div');
+
         row.className = 'time-row';
+
         row.innerHTML = `
-            <div class="time-day">${day}</div>
-            <label class="time-assign">
-                <input type="checkbox" class="time-assigned-checkbox" data-day="${dayKey}" ${assignment.assigned ? 'checked' : ''}>
-                Assigned
+            <div class="time-row-header">${day}</div>
+
+            <label class="time-assigned-checkbox">
+                <input type="checkbox" class="time-assigned-checkbox" data-day="${dayKey}" ${assignment?.assigned ? 'checked' : ''}>
+                <span>Assigned</span>
             </label>
-            <div class="time-input-group">
-                <input type="time" class="time-input start-time" data-day="${dayKey}" value="${assignment.startTime || ''}" ${assignment.assigned ? '' : 'disabled'}>
-                <span>to</span>
-                <input type="time" class="time-input end-time" data-day="${dayKey}" value="${assignment.endTime || ''}" ${assignment.assigned ? '' : 'disabled'}>
+
+            <div class="time-inputs">
+                <input
+                    type="time"
+                    class="time-input start-time"
+                    value="${assignment?.start_time || ''}"
+                    ${!assignment?.assigned ? 'disabled' : ''}
+                >
+                <span class="time-separator">to</span>
+                <input
+                    type="time"
+                    class="time-input end-time"
+                    value="${assignment?.end_time || ''}"
+                    ${!assignment?.assigned ? 'disabled' : ''}
+                >
             </div>
         `;
         rotaTimeBody.appendChild(row);
@@ -559,41 +581,52 @@ function closeRotaTimeModal() {
     currentTimeModalEmployeeId = null;
 }
 
-function saveRotaTimeSettings() {
+async function saveRotaTimeSettings() {
     if (!currentTimeModalEmployeeId) return;
 
-    const rota = getRota();
-    if (!rota[currentTimeModalEmployeeId]) {
-        rota[currentTimeModalEmployeeId] = {};
-    }
+    const updates = [];
 
     rotaTimeBody.querySelectorAll('.time-row').forEach(row => {
         const day = row.querySelector('.time-assigned-checkbox').dataset.day;
-        const assigned = row.querySelector('.time-assigned-checkbox').checked;
+
+        const assigned =
+            row.querySelector('.time-assigned-checkbox').checked;
+
         const startTime = row.querySelector('.start-time').value;
         const endTime = row.querySelector('.end-time').value;
 
-        rota[currentTimeModalEmployeeId][day] = {
-            assigned: assigned,
-            hours: assigned ? calculateShiftHours(startTime, endTime) : 0,
-            startTime: assigned ? startTime : '',
-            endTime: assigned ? endTime : ''
-        };
+        updates.push(
+            updateRotaShiftTimes(
+                currentTimeModalEmployeeId,
+                day,
+                startTime,
+                endTime
+            )
+        );
     });
 
-    saveRota(rota);
+    await Promise.all(updates);
+
     closeRotaTimeModal();
-    renderRotaGrid();
+
+    await renderRotaGrid();
 }
 
-function handleAssignmentChange(e) {
+async function handleAssignmentChange(e) {
     const cell = e.target.closest('.rota-assignment');
-    const employeeId = cell.dataset.employeeId;
+
+    const employeeId = Number(cell.dataset.employeeId);
     const day = cell.dataset.day;
     const assigned = e.target.checked;
 
-    updateRotaAssignment(employeeId, day, assigned, 0);
-    renderRotaGrid();
+    await updateRotaAssignment(
+        employeeId,
+        day,
+        assigned,
+        0
+    );
+
+    await renderRotaGrid();
 }
 
 // Initialize when DOM is ready

@@ -1,345 +1,386 @@
-// Housekeeping App - Data Management
-const STORAGE_KEY = 'housekeeping_rooms';
+import { supabase } from './supabase.js';
 
-// Define the hotel structure: 5 stairways, 4 floors
-// Each stairway has a different number of rooms
-const HOTEL_CONFIG = {
-    stairways: [
-        { id: 1, name: 'Stairway 51', roomsPerFloor: 1, area: 'main' },
-        { id: 2, name: 'Stairway 49', roomsPerFloor: 1, area: 'main' },
-        { id: 3, name: 'Stairway 47', roomsPerFloor: 1, area: 'main' },
-        { id: 4, name: 'Stairway 45', roomsPerFloor: 1, area: 'main' },
-        { id: 5, name: 'Stairway 43', roomsPerFloor: 1, area: 'main' },
-        { id: 6, name: 'Apartments', roomsPerFloor: 1, area: 'apartments' }
-    ],
-    floors: [4, 3, 2, 1]
-};
+/* =========================
+   ROOMS
+========================= */
 
-// Default room statuses
-const DEFAULT_STATUSES = ['done', 'service', 'checked', 'maintenance', 'checkout', 'occupied'];
+export async function loadRooms() {
+    const { data, error } = await supabase
+        .from('rooms')
+        .select(`
+            *,
+            stairways (
+                id,
+                name,
+                area
+            )
+        `)
+        .order('stairway_id')
+        .order('floor', { ascending: false })
+        .order('name');
 
-// Load rooms from localStorage or return empty if none stored
-function loadRooms() {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
-            console.error('Error parsing stored rooms:', e);
-        }
+    if (error) {
+        console.error('Error loading rooms:', error);
+        return [];
     }
-    
-    // Return empty array - no auto-generation
-    // Rooms must be explicitly added via importRooms()
-    return [];
+
+    return data || [];
 }
 
-// Save rooms to localStorage
-function saveRooms(rooms) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rooms));
-}
+export async function getRooms(filters = {}) {
+    let query = supabase
+        .from('rooms')
+        .select(`
+            *,
+            stairways (
+                id,
+                name,
+                area
+            )
+        `);
 
-// Get rooms by filter
-function getRooms(filters = {}) {
-    let rooms = loadRooms();
-    
-    if (filters.stairway) {
-        rooms = rooms.filter(r => r.stairway === filters.stairway);
+    if (filters.stairway_id) {
+        query = query.eq('stairway_id', filters.stairway_id);
     }
-    
+
     if (filters.floor) {
-        rooms = rooms.filter(r => r.floor === filters.floor);
+        query = query.eq('floor', filters.floor);
     }
-    
+
     if (filters.status) {
-        rooms = rooms.filter(r => r.status === filters.status);
+        query = query.eq('status', filters.status);
     }
-    
-    return rooms;
+
+    const { data, error } = await query
+        .order('stairway_id')
+        .order('floor', { ascending: false })
+        .order('name');
+
+    if (error) {
+        console.error('Error loading filtered rooms:', error);
+        return [];
+    }
+
+    return data || [];
 }
 
-// Get a single room by ID
-function getRoom(roomId) {
-    const rooms = loadRooms();
-    return rooms.find(r => r.id === roomId);
+export async function getRoom(roomId) {
+    const { data, error } = await supabase
+        .from('rooms')
+        .select(`
+            *,
+            stairways (
+                id,
+                name,
+                area
+            )
+        `)
+        .eq('id', roomId)
+        .single();
+
+    if (error) {
+        console.error('Error loading room:', error);
+        return null;
+    }
+
+    return data;
 }
 
-// Update a room
-function updateRoom(roomId, updates) {
-    const rooms = loadRooms();
-    const index = rooms.findIndex(r => r.id === roomId);
-    
-    if (index !== -1) {
-        rooms[index] = {
-            ...rooms[index],
+export async function updateRoom(roomId, updates) {
+    const { data, error } = await supabase
+        .from('rooms')
+        .update({
             ...updates,
-            lastUpdated: new Date().toISOString()
-        };
-        saveRooms(rooms);
-        return rooms[index];
+            last_updated: new Date().toISOString()
+        })
+        .eq('id', roomId)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error updating room:', error);
+        return null;
     }
-    
-    return null;
+
+    return data;
 }
 
-// Reset a room (reset to default)
-function resetRoom(roomId) {
-    const rooms = loadRooms();
-    const index = rooms.findIndex(r => r.id === roomId);
-    
-    if (index !== -1) {
-        rooms[index] = {
-            ...rooms[index],
-            status: 'checked',
-            notes: '',
-            guest: '',
-            breakfast: false,
-            lastUpdated: new Date().toISOString()
-        };
-        saveRooms(rooms);
-        return rooms[index];
-    }
-    
-    return null;
+export async function resetRoom(roomId) {
+    return await updateRoom(roomId, {
+        status: 'checked',
+        notes: '',
+        guest: 0,
+        breakfast: false
+    });
 }
 
-// Get status summary
-function getStatusSummary(area = 'main') {
-    const rooms = loadRooms();
-    const summary = {};
-    const allowedStairwayIds = HOTEL_CONFIG.stairways
-        .filter(stairway => stairway.area === area)
-        .map(stairway => stairway.id);
+export async function getStatusSummary(area = 'main') {
+    const { data, error } = await supabase
+        .from('rooms')
+        .select(`
+            status,
+            stairways!inner (
+                area
+            )
+        `)
+        .eq('stairways.area', area);
 
-    DEFAULT_STATUSES.forEach(status => {
-        summary[status] = 0;
+    if (error) {
+        console.error('Error loading status summary:', error);
+        return {};
+    }
+
+    const summary = {
+        done: 0,
+        service: 0,
+        checked: 0,
+        maintenance: 0,
+        checkout: 0,
+        occupied: 0
+    };
+
+    data.forEach(room => {
+        summary[room.status] = (summary[room.status] || 0) + 1;
     });
-    
-    rooms.forEach(room => {
-        if (allowedStairwayIds.includes(room.stairway) && summary[room.status] !== undefined) {
-            summary[room.status]++;
-        }
-    });
-    
+
     return summary;
 }
 
-// Get rooms grouped by stairway and floor
-function getRoomsByLocation(area = 'main') {
-    const rooms = loadRooms();
+export async function getRoomsByLocation(area = 'main') {
+    const { data, error } = await supabase
+        .from('rooms')
+        .select(`
+            *,
+            stairways!inner (
+                id,
+                name,
+                area
+            )
+        `)
+        .eq('stairways.area', area)
+        .order('stairway_id')
+        .order('floor', { ascending: false })
+        .order('name');
+
+    if (error) {
+        console.error('Error loading grouped rooms:', error);
+        return {};
+    }
+
     const grouped = {};
-    
-    HOTEL_CONFIG.stairways
-        .filter(stairway => stairway.area === area)
-        .forEach(stairway => {
+
+    data.forEach(room => {
+        const stairway = room.stairways;
+
+        if (!grouped[stairway.id]) {
             grouped[stairway.id] = {
                 name: stairway.name,
                 floors: {}
             };
-            
-            HOTEL_CONFIG.floors.forEach(floor => {
-                grouped[stairway.id].floors[floor] = rooms.filter(
-                    r => r.stairway === stairway.id && r.floor === floor
-                ).sort((a, b) => String(a.name).localeCompare(String(b.name)));
-            });
-        });
-    
+        }
+
+        if (!grouped[stairway.id].floors[room.floor]) {
+            grouped[stairway.id].floors[room.floor] = [];
+        }
+
+        grouped[stairway.id].floors[room.floor].push(room);
+    });
+
     return grouped;
 }
 
-// Reset all rooms to default state
-function resetAllRooms() {
-    localStorage.removeItem(STORAGE_KEY);
-    return [];
-}
+export async function resetAllRooms() {
+    const { error } = await supabase
+        .from('rooms')
+        .update({
+            status: 'checked',
+            notes: '',
+            guest: 0,
+            breakfast: false,
+            last_updated: new Date().toISOString()
+        })
+        .neq('id', '');
 
-// Employee and Rota Management
-const EMPLOYEES_KEY = 'housekeeping_employees';
-const ROTA_KEY = 'housekeeping_rota';
-
-// Get all employees
-function getEmployees() {
-    const stored = localStorage.getItem(EMPLOYEES_KEY);
-    
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
-            console.error('Error parsing stored employees:', e);
-        }
+    if (error) {
+        console.error('Error resetting all rooms:', error);
     }
-    
-    return [];
 }
 
-// Add a new employee
-function addEmployee(name) {
-    const employees = getEmployees();
-    const newEmployee = {
-        id: Date.now().toString(),
-        name: name.trim()
-    };
-    
-    employees.push(newEmployee);
-    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
-    return newEmployee;
-}
+/* =========================
+   EMPLOYEES
+========================= */
 
-// Remove an employee
-function removeEmployee(employeeId) {
-    const employees = getEmployees();
-    const filtered = employees.filter(emp => emp.id !== employeeId);
-    localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(filtered));
-    
-    // Also remove from rota
-    const rota = getRota();
-    delete rota[employeeId];
-    saveRota(rota);
-}
+export async function getEmployees() {
+    const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .order('id');
 
-// Get rota data
-function getRota() {
-    const stored = localStorage.getItem(ROTA_KEY);
-    
-    if (stored) {
-        try {
-            return JSON.parse(stored);
-        } catch (e) {
-            console.error('Error parsing stored rota:', e);
-        }
+    if (error) {
+        console.error('Error loading employees:', error);
+        return [];
     }
-    
-    return {};
+
+    return data || [];
 }
 
-// Save rota data
-function saveRota(rota) {
-    localStorage.setItem(ROTA_KEY, JSON.stringify(rota));
+export async function addEmployee(name) {
+    const cleanName = name.trim();
+
+    const { data: existing } = await supabase
+        .from('employees')
+        .select('id')
+        .ilike('name', cleanName)
+        .maybeSingle();
+
+    if (existing) {
+        alert('Employee already exists');
+        return null;
+    }
+
+    const { data, error } = await supabase
+        .from('employees')
+        .insert({
+            name: cleanName
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error adding employee:', error);
+        return null;
+    }
+
+    return data;
 }
 
-// Calculate shift hours from start and end times
-function calculateShiftHours(startTime, endTime) {
-    if (!startTime || !endTime) {
+export async function removeEmployee(employeeId) {
+    const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', employeeId);
+
+    if (error) {
+        console.error('Error removing employee:', error);
+    }
+}
+
+/* =========================
+   ROTA
+========================= */
+
+export function calculateShiftHours(start_time, end_time) {
+    if (!start_time || !end_time) {
         return 0;
     }
 
-    const [startHours, startMinutes] = startTime.split(':').map(Number);
-    const [endHours, endMinutes] = endTime.split(':').map(Number);
+    const [startHours, startMinutes] = start_time
+        .split(':')
+        .map(Number);
+
+    const [endHours, endMinutes] = end_time
+        .split(':')
+        .map(Number);
+
     const start = startHours + startMinutes / 60;
     const end = endHours + endMinutes / 60;
+
     const diff = end - start;
-    return diff > 0 ? Math.round(diff * 100) / 100 : 0;
+
+    return diff > 0
+        ? Math.round(diff * 100) / 100
+        : 0;
 }
 
-// Update rota assignment
-function updateRotaAssignment(employeeId, day, assigned, hours) {
-    const rota = getRota();
-    const existing = rota[employeeId]?.[day] || {};
+export async function updateRotaAssignment(
+    employeeId,
+    day,
+    assigned
+) {
+    const existing = await getRotaDay(employeeId, day);
 
-    if (!rota[employeeId]) {
-        rota[employeeId] = {};
+    const { error } = await supabase
+        .from('rota')
+        .upsert({
+            employee_id: employeeId,
+            day,
+            assigned,
+            start_time: assigned
+                ? existing?.start_time || null
+                : null,
+            end_time: assigned
+                ? existing?.end_time || null
+                : null,
+            hours: assigned
+                ? existing?.hours || 0
+                : 0,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'employee_id,day'
+        });
+
+    if (error) {
+        console.error('Error updating rota assignment:', error);
     }
-    
-    rota[employeeId][day] = {
-        assigned: assigned,
-        hours: assigned ? hours : 0,
-        startTime: assigned ? existing.startTime || '' : '',
-        endTime: assigned ? existing.endTime || '' : ''
-    };
-    
-    saveRota(rota);
 }
 
-function updateRotaShiftTimes(employeeId, day, startTime, endTime) {
-    const rota = getRota();
-    
-    if (!rota[employeeId]) {
-        rota[employeeId] = {};
+export async function updateRotaShiftTimes(
+    employeeId,
+    day,
+    start_time,
+    end_time
+) {
+    const assigned = Boolean(start_time && end_time);
+
+    const hours = calculateShiftHours(
+        start_time,
+        end_time
+    );
+
+    const { error } = await supabase
+        .from('rota')
+        .upsert({
+            employee_id: employeeId,
+            day,
+            assigned,
+            start_time: start_time || null,
+            end_time: end_time || null,
+            hours,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'employee_id,day'
+        });
+
+    if (error) {
+        console.error('Error updating rota shift times:', error);
+    }
+}
+
+export async function getRotaDay(employeeId, day) {
+    const { data, error } = await supabase
+        .from('rota')
+        .select('*')
+        .eq('employee_id', employeeId)
+        .eq('day', day)
+        .maybeSingle();
+
+    if (error) {
+        console.error('Error loading rota day:', error);
+        return null;
     }
 
-    const assigned = Boolean(startTime && endTime);
-    const hours = calculateShiftHours(startTime, endTime);
-
-    rota[employeeId][day] = {
-        assigned: assigned,
-        hours: assigned ? hours : 0,
-        startTime: assigned ? startTime : '',
-        endTime: assigned ? endTime : ''
-    };
-
-    saveRota(rota);
+    return data;
 }
 
-// Import rooms from a JSON array (e.g., from rooms.json)
-function importRooms(roomList) {
-    if (!Array.isArray(roomList)) {
-        console.error('Invalid room list: expected an array');
-        return false;
+export async function getRota() {
+    const { data, error } = await supabase
+        .from('rota')
+        .select('*');
+
+    if (error) {
+        console.error('Error loading rota:', error);
+        return [];
     }
-    
-    const rooms = roomList.map(room => ({
-        id: room.id,
-        stairway: room.stairway,
-        floor: room.floor,
-        name: room.name,
-        status: room.status || 'checked',
-        notes: room.notes || '',
-        guest: room.guest || '',
-        breakfast: room.breakfast || false,
-        area: room.area || 'main',
-        lastUpdated: room.lastUpdated || new Date().toISOString()
-    }));
-    
-    saveRooms(rooms);
-    return true;
-}
 
-// Export functions for use in app.js
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {
-        HOTEL_CONFIG,
-        DEFAULT_STATUSES,
-        loadRooms,
-        saveRooms,
-        getRooms,
-        getRoom,
-        updateRoom,
-        resetRoom,
-        getStatusSummary,
-        getRoomsByLocation,
-        resetAllRooms,
-        importRooms,
-        getEmployees,
-        addEmployee,
-        removeEmployee,
-        getRota,
-        saveRota,
-        updateRotaAssignment,
-        updateRotaShiftTimes
-    };
-
-    // Also expose functions globally for browser use
-    if (typeof window !== 'undefined') {
-        window.HOTEL_CONFIG = HOTEL_CONFIG;
-        window.DEFAULT_STATUSES = DEFAULT_STATUSES;
-        window.loadRooms = loadRooms;
-        window.saveRooms = saveRooms;
-        window.getRooms = getRooms;
-        window.getRoom = getRoom;
-        window.updateRoom = updateRoom;
-        window.resetRoom = resetRoom;
-        window.getStatusSummary = getStatusSummary;
-        window.getRoomsByLocation = getRoomsByLocation;
-
-        window.resetAllRooms = resetAllRooms;
-        window.getEmployees = getEmployees;
-        window.addEmployee = addEmployee;
-        window.removeEmployee = removeEmployee;
-        window.getRota = getRota;
-        window.saveRota = saveRota;
-        window.updateRotaAssignment = updateRotaAssignment;
-        window.updateRotaShiftTimes = updateRotaShiftTimes;
-        window.importRooms = importRooms;
-    };
+    return data || [];
 }
