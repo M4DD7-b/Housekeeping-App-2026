@@ -209,6 +209,20 @@ async function setupEventListeners() {
         }
     });
 
+    const legendToggle = document.querySelector('.legend-toggle');
+
+    if (legendToggle) {
+        legendToggle.addEventListener('click', () => {
+            const legendWrapper = document.querySelector('.legendWrapper');
+            const expanded = legendWrapper.classList.toggle('open');
+
+            legendToggle.setAttribute(
+                'aria-expanded',
+                expanded ? 'true' : 'false'
+            );
+        });
+    }
+
     modalCloseButtons.forEach(button => button.addEventListener('click', closeModal));
 
     roomModal.addEventListener('click', (e) => {
