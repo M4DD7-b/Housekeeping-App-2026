@@ -2,6 +2,9 @@ To do:
     Functionality:
         - Make Summary Cards into clickable lists
             Make assigning and logging hours easier: what if someone finishes early??
+        - Collapsable lists are blue on mobile
+        - Employee collapse does not function on mobile.
+        - Employee rota assignment does not function on mobile.
     Deployment:
         - Employee opens app URL
         - Must logging- Supabase Auth Validates under

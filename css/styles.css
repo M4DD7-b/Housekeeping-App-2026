@@ -937,6 +937,7 @@ body.rota-active .app-header {
     }
 
     .legend-toggle {
+        font-size: 0.9rem;
         display: flex;
     }
 
