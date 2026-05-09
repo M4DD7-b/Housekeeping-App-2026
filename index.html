@@ -69,10 +69,20 @@
 
         <div id="rotaView" class="hidden">
             <div class="rota-page">
-                <div class="employees-section">
-                    <h3>Available Employees</h3>
-                    <div id="employeesList" class="employees-list"></div>
-                    <button id="addEmployeeBtn" class="btn btn-secondary">+ Add Employee</button>
+                <div class="employees-section" id="employeesSection">
+                    <button class="employees-toggle" id="employeesToggle" type="button">
+                        <span>Available Employees</span>
+                        <span class="employees-toggle-arrow">◂</span>
+                    </button>
+
+                    <div class="employees-content" id="employeesContent">
+                        <div id="employeesList" class="employees-list"></div>
+
+                        <button id="addEmployeeBtn" class="btn btn-secondary">
+                            + Add Employee
+                        </button>
+                    </div>
+
                 </div>
                 <div class="rota-section">
                     <div class="rota-header-row">

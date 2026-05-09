@@ -223,6 +223,19 @@ async function setupEventListeners() {
         });
     }
 
+    const employeesToggle = document.getElementById('employeesToggle');
+
+    if (employeesToggle) {
+
+        employeesToggle.addEventListener('click', () => {
+
+            const employeesSection =
+                document.getElementById('employeesSection');
+
+            employeesSection.classList.toggle('collapsed');
+        });
+    }
+
     modalCloseButtons.forEach(button => button.addEventListener('click', closeModal));
 
     roomModal.addEventListener('click', (e) => {
